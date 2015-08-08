@@ -1,0 +1,106 @@
+<div class="container">
+    <ul class="nav nav-tabs" id="main-menu" role="tablist">
+        <li role="presentation" class="active">
+            <a href="#ranks">Ranking</a>
+        </li>
+        <li role="presentation">
+            <a href="#matches">
+                Match history
+            </a>
+        </li>
+        <div class="pull-right">
+            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#add-match-modal">
+                <i class="fa fa-plus"></i>
+                <span class="hide-mobile">Add match</span>
+            </button>
+        </div>
+    </ul>
+
+    <div class="tab-content">
+        <div role="tabpanel" class="tab-pane active" id="ranks">
+            <!-- RANK table -->
+            <table class="table">
+                <thead>
+                  <tr>
+                      <th>Rank</th>
+                      <th>Name</th>
+                      <th>Points</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {{#each users}}
+                      <tr {{#if self}}class="warning"{{/if}}>
+                        <td>{{rank}}</td>
+                        <td>{{name}}</td>
+                        <td>{{points}}</td>
+                    </tr>
+                  {{/each}}
+                </tbody>
+            </table>
+        </div>
+        <div role="tabpanel" class="tab-pane" id="matches">
+            <!-- Match history table -->
+            <table class="table">
+                <thead>
+                  <tr>
+                      <th>1st player</th>
+                      <th>Result</th>
+                      <th>2nd player</th>
+                      <th>Time</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {{#each matches}}
+                    <tr class="{{#if winner}}success{{/if}} {{#if looser}}danger{{/if}}">
+                        <td>{{submitter.name}} ({{submitter.points}})</td>
+                        <td>{{result}}</td>
+                        <td>{{other.name}} ({{other.points}})</td>
+                        <td class="timed-var" data-time="{{createAt}}">{{createAt}}</td>
+                    </tr>
+                  {{/each}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="add-match-modal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">New match</h4>
+            </div>
+            <div class="modal-body">
+                <!-- add match form -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Submit</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function(){
+        $('#main-menu a').click(function (e) {
+            e.preventDefault()
+            $(this).tab('show')
+        });
+
+        function calculateTime() {
+            $('.timed-var').each(function(){
+                var time = $(this).data('time');
+                $(this).html(moment(time).fromNow());
+            });
+        }
+
+        calculateTime();
+        setInterval(function(){
+          calculateTime();
+        }, 5000);
+    });
+
+
+</script>

@@ -1,0 +1,14 @@
+{
+  "name": "documents",
+  "version": "0.0.1",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "components"
+  ],
+  "dependencies": {
+    "bootstrap": "~3.3.5",
+    "fontawesome": "~4.4.0",
+    "moment": "~2.10.6"
+  }
+}

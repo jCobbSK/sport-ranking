@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width">
+  <title>{{title }}</title>
+  <link rel="stylesheet" href="/components/bootstrap/dist/css/bootstrap.css">
+  <link rel="stylesheet" href="/components/fontawesome/css/font-awesome.css">
+  <link rel="stylesheet" href="/css/style.css">
+  {{#if ENV_DEVELOPMENT}}
+    <script src="http://localhost:35729/livereload.js"></script>
+  {{/if}}
+</head>
+<body>
+  <script src="/components/jquery/dist/jquery.min.js"></script>
+
+  <nav class="navbar navbar-default">
+      <div class="container-fluid">
+          <div class="navbar-header">
+              <a class="navbar-brand" href="#">
+                  Bude obrazok
+              </a>
+          </div>
+
+        <div class="collapse navbar-collapse">
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    <a href="/logout">Logout</a>
+                </li>
+            </ul>
+        </div>
+
+      </div>
+  </nav>
+
+  {{{body}}}
+
+
+  <script src="/components/bootstrap/dist/js/bootstrap.min.js"></script>
+  <script src="/components/moment/min/moment.min.js"></script>
+  </body>
+</html>

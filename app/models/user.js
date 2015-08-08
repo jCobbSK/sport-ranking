@@ -1,0 +1,29 @@
+'use strict';
+module.exports = function(sequelize, DataTypes) {
+  var User = sequelize.define('User', {
+    name: DataTypes.STRING,
+    points: DataTypes.INTEGER,
+    facebook_token: DataTypes.STRING
+  }, {
+    classMethods: {
+      associate: function(models) {
+        // associations can be defined here
+        User.hasMany(models.Match, {
+          foreignKey: 'winner_id',
+          as: 'wins'
+        });
+
+        User.hasMany(models.Match, {
+          foreignKey: 'looser_id',
+          as: 'losses'
+        });
+
+        User.hasMany(models.Match, {
+          foreignKey: 'submitter_id',
+          as: 'submits'
+        });
+      }
+    }
+  });
+  return User;
+};

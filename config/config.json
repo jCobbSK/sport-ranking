@@ -1,0 +1,23 @@
+{
+  "development": {
+    "username": "jakubkanitra",
+    "password": "roh4dZi3",
+    "database": "sport-ranking",
+    "host": "127.0.0.1",
+    "dialect": "postgres"
+  },
+  "test": {
+    "username": "jakubkanitra",
+    "password": "roh4dZi3",
+    "database": "sport-ranking",
+    "host": "127.0.0.1",
+    "dialect": "postgres"
+  },
+  "production": {
+    "username": "jakubkanitra",
+    "password": "roh4dZi3",
+    "database": "sport-ranking",
+    "host": "127.0.0.1",
+    "dialect": "postgres"
+  }
+}
