@@ -29,8 +29,8 @@ router.get('/', isLoggedIn, function (req, res, next) {
   res.render('index', {
     title: 'Generator-Express MVC',
     users: [
-      {rank: 1, name: 'Jakub', points: '1600', self: true},
-      {rank: 2, name: 'Palo', points: '1605', self: false}
+      {id: 1, rank: 1, name: 'Jakub', points: '1600', self: true},
+      {id: 2, rank: 2, name: 'Palo', points: '1605', self: false}
     ],
 
     matches: [

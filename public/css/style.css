@@ -10,6 +10,11 @@ a {
   left: 50%;
   transform: translate(-50%, -50%); }
 
+.new-match-input {
+  width: 40%;
+  float: left;
+  margin: 0px 15px; }
+
 @media screen and (max-width: 600px) {
   .hide-mobile {
     display: none; } }
