@@ -2,7 +2,10 @@
 module.exports = function(sequelize, DataTypes) {
   var User = sequelize.define('User', {
     name: DataTypes.STRING,
-    points: DataTypes.INTEGER,
+    points: {
+      type: DataTypes.INTEGER,
+      defaultValue: 1600
+    },
     facebook_token: DataTypes.STRING
   }, {
     classMethods: {

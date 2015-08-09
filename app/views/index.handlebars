@@ -55,7 +55,7 @@
                         <td>{{submitter.name}} ({{submitter.points}})</td>
                         <td>{{result}}</td>
                         <td>{{other.name}} ({{other.points}})</td>
-                        <td class="timed-var" data-time="{{createAt}}">{{createAt}}</td>
+                        <td class="timed-var" data-time="{{createdAt}}">{{createdAt}}</td>
                     </tr>
                   {{/each}}
                 </tbody>
@@ -67,48 +67,51 @@
 <div class="modal fade" id="add-match-modal">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title">New match</h4>
-            </div>
-            <div class="modal-body">
-                <!-- add match form -->
-                <div class="form-group">
-                    <label for="oponent">Oponent</label>
-                    <select class="form-control">
+            <form action="/add_match" method="POST">
+              <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                  <h4 class="modal-title">New match</h4>
+              </div>
+              <div class="modal-body">
+                  <!-- add match form -->
+                  <div class="form-group">
+                      <label for="oponent">Oponent</label>
+                      <select class="form-control" name="oponent">
                         {{#each users}}
                           {{#unless self}}
-                            <option value="{{id}}">{{name}}</option>
+                              <option value="{{id}}">{{name}}</option>
                           {{/unless}}
                         {{/each}}
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="first-set">1st set</label>
-                  <div>
-                      <input type="number" class="form-control new-match-input" placeholder="Your 1st set result">
-                      <input type="number" class="form-control new-match-input" placeholder="Oponent's 1st set result">
+                      </select>
                   </div>
-                </div>
-                <div class="form-group" style="clear:both;">
-                    <label for="first-set">2nd set</label>
-                    <div>
-                        <input type="number" class="form-control new-match-input" placeholder="Your 2nd set result">
-                        <input type="number" class="form-control new-match-input" placeholder="Oponent's 2nd set result">
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="first-set">3rd set (if needed)</label>
-                  <div>
-                      <input type="number" class="form-control new-match-input" placeholder="Your 3rd set result">
-                      <input type="number" class="form-control new-match-input" placeholder="Oponent's 3rd set result">
+                  <div class="form-group">
+                      <label for="first-set">1st set</label>
+                      <div>
+                          <input type="number" name="first-submitter" class="form-control new-match-input" placeholder="Your 1st set result">
+                          <input type="number" name="first-oponent" class="form-control new-match-input" placeholder="Oponent's 1st set result">
+                      </div>
                   </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary">Submit</button>
-            </div>
+                  <div class="form-group" style="clear:both;">
+                      <label for="first-set">2nd set</label>
+                      <div>
+                          <input type="number" name="second-submitter" class="form-control new-match-input" placeholder="Your 2nd set result">
+                          <input type="number" name="second-oponent" class="form-control new-match-input" placeholder="Oponent's 2nd set result">
+                      </div>
+                  </div>
+                  <div class="form-group">
+                      <label for="first-set">3rd set (if needed)</label>
+                      <div>
+                          <input type="number" name="third-submitter" class="form-control new-match-input" placeholder="Your 3rd set result">
+                          <input type="number" name="third-oponent" class="form-control new-match-input" placeholder="Oponent's 3rd set result">
+                      </div>
+                  </div>
+              </div>
+              <div class="modal-footer">
+                  <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                  <input type="submit" value="Submit" class="btn btn-primary">
+                  <!--<button type="button" class="btn btn-primary">Submit</button>-->
+              </div>
+            </form>
         </div>
     </div>
 </div>

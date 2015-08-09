@@ -45,7 +45,11 @@ module.exports = function(app) {
   ));
 
   app.use(cookieParser());
-  app.use(session({secret: 'some secret'}));
+  app.use(session({
+    secret: 'some secret',
+    resave: true,
+    saveUninitialized: true
+  }));
   app.use(passport.initialize());
   app.use(passport.session());
 }
