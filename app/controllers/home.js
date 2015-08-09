@@ -53,10 +53,16 @@ router.get('/', isLoggedIn, function (req, _res, next) {
     var loggedUserId = req.user.id;
 
     //user -> add rank attr and self
+    var rank = 0,
+      points = 100000;
     var users = res[0].map(function(user) {
+      if (user.points < points) {
+        rank++;
+        points = user.points;
+      }
       return {
         id: user.id,
-        rank: 1,
+        rank: rank,
         name: user.name,
         points: user.points,
         self: user.id == loggedUserId
