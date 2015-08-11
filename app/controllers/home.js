@@ -35,7 +35,13 @@ router.get('/', isLoggedIn, function (req, _res, next) {
 
   q.all([
     //users
-    db.User.findAll({order: 'points DESC'}),
+    db.User.findAll({
+      order: 'points DESC',
+      include: [
+        {model: db.Match, as: 'wins'},
+        {model: db.Match, as: 'losses'}
+      ]
+    }),
 
     //matches
     db.Match.findAll({
@@ -65,13 +71,15 @@ router.get('/', isLoggedIn, function (req, _res, next) {
 
       if (user.id == loggedUserId)
         loggedUserRank = rank;
-
+      debugger;
       return {
         id: user.id,
         rank: rank,
         name: user.name,
         points: user.points,
-        self: user.id == loggedUserId
+        self: user.id == loggedUserId,
+        wins: user.wins.length,
+        losts: user.losses.length
       }
     });
     console.log('Users', users);
