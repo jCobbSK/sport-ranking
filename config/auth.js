@@ -5,9 +5,20 @@ var passport = require('passport'),
     db = require('../app/models');
 
 module.exports = function(app) {
-  var FACEBOOK_APP_ID = "1595898494015426";
-  var FACEBOOK_APP_SECRET = "36a84365ec849abc1a2c29e65b56e2b3";
+  var FACEBOOK_SETTINGS = {
+    development: {
+      FACEBOOK_APP_ID: 1611295705809038,
+      FACEBOOK_APP_SECRET: 'dd65faa81506c9bed6c17af52a03c752',
+      callback: 'http://localhost:3500/auth/facebook/callback'
+    },
+    production: {
+      FACEBOOK_APP_ID: "1595898494015426",
+      FACEBOOK_APP_SECRET: "36a84365ec849abc1a2c29e65b56e2b3",
+      callback: 'http://www.jcobb.me/auth/facebook/callback'
+    }
+  };
 
+  var actualFcbConf = (process.env.NODE_ENV == 'production') ? FACEBOOK_SETTINGS['production'] : FACEBOOK_SETTINGS['development'];
   passport.serializeUser(function(user, done) {
     console.log('serializing', user.id);
     done(null, user.id);
@@ -21,9 +32,9 @@ module.exports = function(app) {
   });
 
   passport.use(new FacebookStrategy({
-      clientID: FACEBOOK_APP_ID,
-      clientSecret: FACEBOOK_APP_SECRET,
-      callbackURL: "http://localhost:3500/auth/facebook/callback",
+      clientID: actualFcbConf.FACEBOOK_APP_ID,
+      clientSecret: actualFcbConf.FACEBOOK_APP_SECRET,
+      callbackURL: actualFcbConf.callback,
       profileFields: ['id', 'displayName']
     },
     function(accessToken, refreshToken, profile, done){
