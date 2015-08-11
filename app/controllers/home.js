@@ -4,7 +4,8 @@ var express = require('express'),
   passport = require('passport'),
   q = require('q'),
   Elo = require('arpad'),
-  matchManagement = require('../lib/matchManagement');
+  matchManagement = require('../lib/matchManagement'),
+  validator = require('validator');
 
 var elo = new Elo();
 
@@ -126,9 +127,31 @@ router.get('/', isLoggedIn, function (req, _res, next) {
   //});
 });
 
-router.post('/add_match', isLoggedIn, function(req, res, next) {
+router.post('/add_match', isLoggedIn, function(req, _res, next) {
   var data = req.body;
   console.log('DATA ADD MATCH', data);
+
+  //check params
+  var firstKey = ['first', 'second', 'third'],
+    secondKey = ['submitter', 'oponent'];
+  var correct = true;
+  for (var f in firstKey) {
+    for (var s in secondKey) {
+      var val = data[firstKey[f] + '-' + secondKey[s]];
+      if (val != '' && !validator.isInt(val, {min: 0, max: 100})) {
+        correct = false;
+      }
+    }
+  }
+
+  if (!validator.isInt(data['oponent']))
+    correct = false;
+
+  if (!correct) {
+    //bad one or more params
+    _res.redirect('/?error=' + encodeURIComponent('Bad params'));
+    return;
+  }
 
   //check params
   q.all([
@@ -136,7 +159,8 @@ router.post('/add_match', isLoggedIn, function(req, res, next) {
     db.User.find(req.body.oponent)
   ]).then(function(res){
     if (!res[0] || !res[1]) {
-      res.sendStatus(401);
+      _res.redirect('/?error='+encodeURIComponent('Not logged in or bad oponent'));
+      return;
     }
 
     var submitterScore = [data['first-submitter'], data['second-submitter'], data['third-submitter']].filter(function(i){
@@ -147,8 +171,15 @@ router.post('/add_match', isLoggedIn, function(req, res, next) {
     });
 
 
-    //define winner/looser
-    var submitterWon = matchManagement.matchResult(submitterScore, oponentScore);
+    try {
+      //define winner/looser
+      var submitterWon = matchManagement.matchResult(submitterScore, oponentScore);
+    } catch(err) {
+      //TIE error
+      _res.redirect('/?error='+encodeURIComponent(err.toString()));
+      return;
+    }
+
     var scoreString = matchManagement.resultToString(submitterScore, oponentScore);
     var winner = (submitterWon) ? res[0] : res[1];
     var looser = (submitterWon) ? res[1] : res[0];
@@ -178,15 +209,13 @@ router.post('/add_match', isLoggedIn, function(req, res, next) {
       })
     ]).then(function(){
       //redirect with change data
-      res.redirect('/');
-    }).catch(function(){
-      res.sendStatus(401);
+      _res.redirect('/');
+    }).catch(function(err){
+      _res.redirect('/?error='+encodeURIComponent(err.toString()));
     })
-  }).catch(function(){
-    res.sendStatus(401);
+  }).catch(function(err){
+    _res.redirect('/?error='+encodeURIComponent(err.toString()));
   });
-
-  res.redirect('/');
 });
 
 function isLoggedIn(req, res, next) {

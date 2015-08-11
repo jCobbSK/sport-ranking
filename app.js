@@ -8,8 +8,6 @@ var app = express();
 require('./config/auth')(app);
 require('./config/express')(app, config);
 
-debugger;
-
 db.sequelize
   .sync()
   .then(function () {

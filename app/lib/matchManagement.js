@@ -14,6 +14,8 @@ module.exports = {
         res += didWin(firstUser[i], secondUser[i]);
     }
 
+    if (res == firstUser.length / 2)
+      throw new Error('Tie!');
     return res > (firstUser.length / 2);
   },
 
