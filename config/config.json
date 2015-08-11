@@ -14,7 +14,7 @@
     "dialect": "postgres"
   },
   "production": {
-    "username": "jakubkanitra",
+    "username": "postgres",
     "password": "roh4dZi3",
     "database": "sport-ranking",
     "host": "127.0.0.1",
