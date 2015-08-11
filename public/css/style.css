@@ -15,6 +15,13 @@ a {
   float: left;
   margin: 0px 15px; }
 
+.last-score-notif {
+  position: fixed;
+  right: 10px;
+  top: 65px;
+  width: 200px;
+  cursor: pointer; }
+
 @media screen and (max-width: 600px) {
   .hide-mobile {
     display: none; } }

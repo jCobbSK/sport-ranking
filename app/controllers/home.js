@@ -52,6 +52,7 @@ router.get('/', isLoggedIn, function (req, _res, next) {
 
     //transform arrays
     var loggedUserId = req.user.id;
+    var loggedUserRank = -1;
 
     //user -> add rank attr and self
     var rank = 0,
@@ -61,6 +62,10 @@ router.get('/', isLoggedIn, function (req, _res, next) {
         rank++;
         points = user.points;
       }
+
+      if (user.id == loggedUserId)
+        loggedUserRank = rank;
+
       return {
         id: user.id,
         rank: rank,
@@ -96,7 +101,11 @@ router.get('/', isLoggedIn, function (req, _res, next) {
     _res.render('index', {
       title: 'Connect ping-pong league',
       users: users,
-      matches: matches
+      matches: matches,
+      showResult: req.query.showResult == 'true',
+      submitPoints: req.query.submitPoints,
+      hasWon: req.query.hasWon == 'true',
+      actualRank: loggedUserRank
     });
   }).catch(function(err) {
     console.error(err);
@@ -190,6 +199,7 @@ router.post('/add_match', isLoggedIn, function(req, _res, next) {
     var looserPoints = elo.newRatingIfLost(looser.points, winner.points);
     var winDiff = winnerPoints - winner.points;
     var lostDiff = looserPoints - looser.points;
+    var submitterPoints = (submitterWon) ? winDiff : lostDiff;
 
     //save everything (update users, create match)
     q.all([
@@ -209,7 +219,7 @@ router.post('/add_match', isLoggedIn, function(req, _res, next) {
       })
     ]).then(function(){
       //redirect with change data
-      _res.redirect('/');
+      _res.redirect('/?showResult=true&submitPoints='+submitterPoints+'&hasWon='+submitterWon);
     }).catch(function(err){
       _res.redirect('/?error='+encodeURIComponent(err.toString()));
     })

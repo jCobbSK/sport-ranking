@@ -116,6 +116,14 @@
     </div>
 </div>
 
+<!-- notification small modal -->
+{{#if showResult}}
+  <div class="last-score-notif alert {{#if hasWon}}alert-success{{/if}} {{#unless hasWon}}alert-danger{{/unless}}">
+    <h2>{{#if hasWon}}+{{/if}}{{submitPoints}} points</h2>
+    <h3>Rank: {{actualRank}}</h3>
+  </div>
+{{/if}}
+
 <script>
     $(document).ready(function(){
         $('#main-menu a').click(function (e) {
@@ -134,6 +142,10 @@
         setInterval(function(){
           calculateTime();
         }, 5000);
+
+        $('.last-score-notif').click(function(){
+            $('.last-score-notif').hide();
+        });
     });
 
 
