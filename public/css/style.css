@@ -22,6 +22,9 @@ a {
   width: 200px;
   cursor: pointer; }
 
+.connect-logo {
+  height: 100%; }
+
 @media screen and (max-width: 600px) {
   .hide-mobile {
     display: none; } }
