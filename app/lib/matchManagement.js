@@ -11,7 +11,7 @@ module.exports = {
     var res = 0;
     for (var i=0, len=firstUser.length; i < len; i++) {
       if (!isNaN(parseInt(firstUser[i])) && !isNaN(parseInt(secondUser[i])))
-        res += didWin(firstUser[i], secondUser[i]);
+        res += didWin(parseInt(firstUser[i]), parseInt(secondUser[i]));
     }
 
     if (res == firstUser.length / 2)
