@@ -123,6 +123,10 @@
   <div class="last-score-notif alert {{#if hasWon}}alert-success{{/if}} {{#unless hasWon}}alert-danger{{/unless}}">
     <h2>{{#if hasWon}}+{{/if}}{{submitPoints}} points</h2>
     <h3>Rank: {{actualRank}}</h3>
+
+    <div class="close-icon">
+        <i class="fa fa-times"></i>
+    </div>
   </div>
 {{/if}}
 

@@ -31,6 +31,13 @@ a {
   height: 100%;
 }
 
+.close-icon {
+  display: inline-block;
+  position: absolute;
+  top: 4px;
+  right: 8px;
+}
+
 @media screen and (max-width: 600px) {
   .hide-mobile {
     display: none;
