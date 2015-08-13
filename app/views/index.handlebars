@@ -99,6 +99,11 @@
                               <option value="{{id}}">{{name}}</option>
                           {{/unless}}
                         {{/each}}
+                        {{#each notRankedUsers}}
+                          {{#unless self}}
+                              <option value="{{id}}">{{name}}</option>
+                          {{/unless}}
+                        {{/each}}
                       </select>
                   </div>
                   <div class="form-group">
