@@ -54,8 +54,6 @@ router.get('/', isLoggedIn, function (req, _res, next) {
 
   ]).then(function(res) {
 
-    console.log('DB res', res[0], res[1]);
-
     //transform arrays
     var loggedUserId = req.user.id;
     var loggedUserRank = -1;
@@ -64,14 +62,13 @@ router.get('/', isLoggedIn, function (req, _res, next) {
     var rank = 0,
       points = 100000;
     var users = res[0].map(function(user) {
-      if (user.points < points) {
+      if (user.points < points && (user.wins.length != 0|| user.losses.length != 0)) {
         rank++;
         points = user.points;
       }
 
       if (user.id == loggedUserId)
         loggedUserRank = rank;
-      debugger;
       return {
         id: user.id,
         rank: rank,
@@ -82,6 +79,15 @@ router.get('/', isLoggedIn, function (req, _res, next) {
         losts: user.losses.length
       }
     });
+
+    var notRankedUsers = users.filter(function(user){
+      return user.wins == 0 && user.losts == 0;
+    });
+
+    var users = users.filter(function(user){
+      return user.wins != 0 || user.losts != 0;
+    });
+
     console.log('Users', users);
 
     //matches
@@ -109,6 +115,7 @@ router.get('/', isLoggedIn, function (req, _res, next) {
     _res.render('index', {
       title: 'Connect ping-pong league',
       users: users,
+      notRankedUsers: notRankedUsers,
       matches: matches,
       showResult: req.query.showResult == 'true',
       submitPoints: req.query.submitPoints,

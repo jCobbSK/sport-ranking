@@ -31,6 +31,10 @@ a {
   top: 4px;
   right: 8px; }
 
+.not-ranked-tr td {
+  text-align: center;
+  color: red; }
+
 @media screen and (max-width: 600px) {
   .hide-mobile {
     display: none; } }

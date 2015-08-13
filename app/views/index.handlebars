@@ -37,6 +37,21 @@
                         <td>{{wins}} / {{losts}}</td>
                     </tr>
                   {{/each}}
+                  {{#if notRankedUsers.length}}
+                    <tr class="not-ranked-tr danger">
+                        <td colspan="4">
+                            Not ranked users yet
+                        </td>
+                    </tr>
+                    {{#each notRankedUsers}}
+                      <tr {{#if self}}class="warning"{{/if}}>
+                          <td>-</td>
+                          <td>{{name}}</td>
+                          <td>{{points}};</td>
+                          <td>{{wins}} / {{losts}}</td>
+                      </tr>
+                    {{/each}}
+                  {{/if}}
                 </tbody>
             </table>
         </div>
