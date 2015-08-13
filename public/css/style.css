@@ -35,6 +35,9 @@ a {
   text-align: center;
   color: red; }
 
+.modal-body {
+  padding: 15px 15px 35px; }
+
 @media screen and (max-width: 600px) {
   .hide-mobile {
     display: none; } }
