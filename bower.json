@@ -9,6 +9,7 @@
   "dependencies": {
     "bootstrap": "~3.3.5",
     "fontawesome": "~4.4.0",
-    "moment": "~2.10.6"
+    "moment": "~2.10.6",
+    "bootstrap-select": "~1.7.3"
   }
 }

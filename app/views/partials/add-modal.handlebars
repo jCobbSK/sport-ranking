@@ -10,7 +10,7 @@
                     <!-- add match form -->
                     <div class="form-group">
                         <label for="oponent">Oponent</label>
-                        <select class="form-control" name="oponent">
+                        <select class="form-control selectpicker" data-live-search="true" name="oponent">
                           {{#each users}}
                             {{#unless self}}
                                 <option value="{{id}}">{{name}}</option>
