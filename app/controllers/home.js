@@ -33,8 +33,6 @@ router.get('/logout', function(req, res, next){
 
 router.get('/', isLoggedIn, function (req, _res, next) {
 
-  var actualPage = (parseInt(req.query.page) >= 0) ? parseInt(req.query.page) : 0;
-
   q.all([
     //users
     db.User.findAll({
