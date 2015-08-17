@@ -33,6 +33,8 @@ router.get('/logout', function(req, res, next){
 
 router.get('/', isLoggedIn, function (req, _res, next) {
 
+  var actualPage = (parseInt(req.query.page) >= 0) ? parseInt(req.query.page) : 0;
+
   q.all([
     //users
     db.User.findAll({
@@ -41,17 +43,7 @@ router.get('/', isLoggedIn, function (req, _res, next) {
         {model: db.Match, as: 'wins'},
         {model: db.Match, as: 'losses'}
       ]
-    }),
-
-    //matches
-    db.Match.findAll({
-      order: '"createdAt" DESC',
-      include: [
-        {model: db.User, as: 'winner'},
-        {model: db.User, as: 'looser'}
-      ]
     })
-
   ]).then(function(res) {
 
     //transform arrays
@@ -88,10 +80,41 @@ router.get('/', isLoggedIn, function (req, _res, next) {
       return user.wins != 0 || user.losts != 0;
     });
 
-    console.log('Users', users);
+    _res.render('index', {
+      title: 'Connect ping-pong league',
+      tab: 'users',
+      users: users,
+      notRankedUsers: notRankedUsers,
+      showResult: req.query.showResult == 'true',
+      submitPoints: req.query.submitPoints,
+      hasWon: req.query.hasWon == 'true',
+      actualRank: loggedUserRank,
+    });
+  }).catch(function(err) {
+    console.error(err);
+    _res.sendStatus(401);
+  });
+});
 
+router.get('/matches', isLoggedIn, function(req, _res, next){
+  var actualPage = (parseInt(req.query.page) >= 0) ? parseInt(req.query.page) : 0;
+
+  q.all([
     //matches
-    var matches = res[1].map(function(match) {
+    db.Match.findAndCount({
+      order: '"createdAt" DESC',
+      include: [
+        {model: db.User, as: 'winner'},
+        {model: db.User, as: 'looser'}
+      ],
+      limit: 10,
+      offset: 10 * actualPage
+    })
+  ]).then(function(res) {
+
+    var loggedUserId = req.user.id;
+    //matches
+    var matches = res[0].rows.map(function(match) {
       var winner = {
         name: match.winner.name,
         points: match.winner_points
@@ -114,42 +137,16 @@ router.get('/', isLoggedIn, function (req, _res, next) {
 
     _res.render('index', {
       title: 'Connect ping-pong league',
-      users: users,
-      notRankedUsers: notRankedUsers,
+      tab: 'matches',
       matches: matches,
-      showResult: req.query.showResult == 'true',
-      submitPoints: req.query.submitPoints,
-      hasWon: req.query.hasWon == 'true',
-      actualRank: loggedUserRank
+      matchPages: Math.ceil(res[0].count / 10),
+      actualPage: actualPage
     });
   }).catch(function(err) {
     console.error(err);
     _res.sendStatus(401);
   });
-
-  //res.render('index', {
-  //  title: 'Connect ping-pong league',
-  //  users: [
-  //    {id: 1, rank: 1, name: 'Jakub', points: '1600', self: true},
-  //    {id: 2, rank: 2, name: 'Palo', points: '1605', self: false}
-  //  ],
-  //
-  //  matches: [
-  //    {
-  //      submitter: {name: 'Jakub', points: 32}, result: '12:10, 10:12, 10:10', other: {name: 'Palo', points: -32},
-  //      createdAt:'1/1/2015', winner: true, looser: false
-  //    },
-  //    {
-  //      submitter: {name: 'Jakub', points: 32}, result: '12:10, 10:12, 10:10', other: {name: 'Palo', points: -32},
-  //      createdAt:'1/1/2015', winner: false, looser: true
-  //    },
-  //    {
-  //      submitter: {name: 'Jakub', points: 32}, result: '12:10, 10:12, 10:10', other: {name: 'Palo', points: -32},
-  //      createdAt:'1/1/2015', winner: false, looser: false
-  //    },
-  //  ]
-  //});
-});
+})
 
 router.post('/add_match', isLoggedIn, function(req, _res, next) {
   var data = req.body;

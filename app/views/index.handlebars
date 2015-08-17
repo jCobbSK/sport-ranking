@@ -1,10 +1,10 @@
 <div class="container">
     <ul class="nav nav-tabs" id="main-menu" role="tablist">
-        <li role="presentation" class="active">
-            <a href="#ranks">Ranking</a>
+        <li role="presentation" {{#ifCond tab '==' 'users'}}class="active"{{/ifCond}}>
+            <a href="/">Ranking</a>
         </li>
-        <li role="presentation">
-            <a href="#matches">
+        <li role="presentation" {{#ifCond tab '==' 'matches'}}class="active"{{/ifCond}}>
+            <a href="/matches">
                 Match history
             </a>
         </li>
@@ -17,145 +17,35 @@
     </ul>
 
     <div class="tab-content">
-        <div role="tabpanel" class="tab-pane active" id="ranks">
-            <!-- RANK table -->
-            <table class="table">
-                <thead>
-                  <tr>
-                      <th>Rank</th>
-                      <th>Name</th>
-                      <th>Points</th>
-                      <th>W/L</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {{#each users}}
-                      <tr {{#if self}}class="warning"{{/if}}>
-                        <td>{{rank}}</td>
-                        <td>{{name}}</td>
-                        <td>{{points}}</td>
-                        <td>{{wins}} / {{losts}}</td>
-                    </tr>
-                  {{/each}}
-                  {{#if notRankedUsers.length}}
-                    <tr class="not-ranked-tr danger">
-                        <td colspan="4">
-                            Not ranked users yet
-                        </td>
-                    </tr>
-                    {{#each notRankedUsers}}
-                      <tr {{#if self}}class="warning"{{/if}}>
-                          <td>-</td>
-                          <td>{{name}}</td>
-                          <td>{{points}}</td>
-                          <td>{{wins}} / {{losts}}</td>
-                      </tr>
-                    {{/each}}
-                  {{/if}}
-                </tbody>
-            </table>
-        </div>
-        <div role="tabpanel" class="tab-pane" id="matches">
-            <!-- Match history table -->
-            <table class="table">
-                <thead>
-                  <tr>
-                      <th>1st player</th>
-                      <th>Result</th>
-                      <th>2nd player</th>
-                      <th>Time</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {{#each matches}}
-                    <tr class="{{#if winner}}success{{/if}} {{#if looser}}danger{{/if}}">
-                        <td>{{submitter.name}} ({{submitter.points}})</td>
-                        <td>{{result}}</td>
-                        <td>{{other.name}} ({{other.points}})</td>
-                        <td class="timed-var" data-time="{{createdAt}}">{{createdAt}}</td>
-                    </tr>
-                  {{/each}}
-                </tbody>
-            </table>
-        </div>
+        {{#ifCond tab '==' 'users'}}
+          {{> users-tab}}
+        {{/ifCond}}
+
+        {{#ifCond tab '==' 'matches'}}
+          {{> matches-tab}}
+        {{/ifCond}}
+
     </div>
 </div>
 
-<div class="modal fade" id="add-match-modal">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <form action="/add_match" method="POST">
-              <div class="modal-header">
-                  <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                  <h4 class="modal-title">New match</h4>
-              </div>
-              <div class="modal-body">
-                  <!-- add match form -->
-                  <div class="form-group">
-                      <label for="oponent">Oponent</label>
-                      <select class="form-control" name="oponent">
-                        {{#each users}}
-                          {{#unless self}}
-                              <option value="{{id}}">{{name}}</option>
-                          {{/unless}}
-                        {{/each}}
-                        {{#each notRankedUsers}}
-                          {{#unless self}}
-                              <option value="{{id}}">{{name}}</option>
-                          {{/unless}}
-                        {{/each}}
-                      </select>
-                  </div>
-                  <div class="form-group">
-                      <label for="first-set">1st set</label>
-                      <div>
-                          <input type="number" min="0" step="1" name="first-submitter" class="form-control new-match-input" placeholder="Your 1st set result" required>
-                          <input type="number" min="0" step="1" name="first-oponent" class="form-control new-match-input" placeholder="Oponent's 1st set result" required>
-                      </div>
-                  </div>
-                  <div class="form-group" style="clear:both;">
-                      <label for="first-set">2nd set</label>
-                      <div>
-                          <input type="number" min="0" step="1" name="second-submitter" class="form-control new-match-input" placeholder="Your 2nd set result" required>
-                          <input type="number" min="0" step="1" name="second-oponent" class="form-control new-match-input" placeholder="Oponent's 2nd set result" required>
-                      </div>
-                  </div>
-                  <div class="form-group">
-                      <label for="first-set">3rd set (if needed)</label>
-                      <div>
-                          <input type="number" min="0" step="1" name="third-submitter" class="form-control new-match-input" placeholder="Your 3rd set result">
-                          <input type="number" min="0" step="1" name="third-oponent" class="form-control new-match-input" placeholder="Oponent's 3rd set result">
-                      </div>
-                  </div>
-              </div>
-              <div class="modal-footer">
-                  <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                  <input type="submit" value="Submit" class="btn btn-primary">
-                  <!--<button type="button" class="btn btn-primary">Submit</button>-->
-              </div>
-            </form>
-        </div>
-    </div>
-</div>
+{{> add-modal}}
 
 <!-- notification small modal -->
-{{#if showResult}}
-  <div class="last-score-notif alert {{#if hasWon}}alert-success{{/if}} {{#unless hasWon}}alert-danger{{/unless}}">
-    <h2>{{#if hasWon}}+{{/if}}{{submitPoints}} points</h2>
-    <h3>Rank: {{actualRank}}</h3>
+{{#ifCond tab '==' 'users'}}
+  {{#if showResult}}
+      <div class="last-score-notif alert {{#if hasWon}}alert-success{{/if}} {{#unless hasWon}}alert-danger{{/unless}}">
+          <h2>{{#if hasWon}}+{{/if}}{{submitPoints}} points</h2>
+          <h3>Rank: {{actualRank}}</h3>
 
-    <div class="close-icon">
-        <i class="fa fa-times"></i>
-    </div>
-  </div>
-{{/if}}
+          <div class="close-icon">
+              <i class="fa fa-times"></i>
+          </div>
+      </div>
+  {{/if}}
+{{/ifCond}}
 
 <script>
     $(document).ready(function(){
-        $('#main-menu a').click(function (e) {
-            e.preventDefault()
-            $(this).tab('show')
-        });
 
         function calculateTime() {
             $('.timed-var').each(function(){
@@ -164,10 +54,10 @@
             });
         }
 
-        calculateTime();
-        setInterval(function(){
-          calculateTime();
-        }, 5000);
+//        calculateTime();
+//        setInterval(function(){
+//          calculateTime();
+//        }, 5000);
 
         $('.last-score-notif').click(function(){
             $('.last-score-notif').hide();
