@@ -126,6 +126,7 @@ router.get('/matches', isLoggedIn, function(req, _res, next){
 
       return {
         submitter: (match.submitter_id == match.winner_id) ? winner : looser,
+        submitterIsWinner: match.submitter_id == match.winner_id,
         other: (match.submitter_id == match.winner_id) ? looser : winner,
         createdAt: match.createdAt,
         result: match.score,
