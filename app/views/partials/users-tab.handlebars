@@ -26,7 +26,7 @@
         {{/each}}
         {{#if notRankedUsers.length}}
             <tr class="not-ranked-tr danger">
-                <td colspan="4">
+                <td colspan="5">
                     Not ranked users yet
                 </td>
             </tr>
@@ -36,6 +36,7 @@
                     <td>{{name}}</td>
                     <td>{{points}}</td>
                     <td>{{wins}} / {{losts}}</td>
+                    <td></td>
                 </tr>
             {{/each}}
         {{/if}}
