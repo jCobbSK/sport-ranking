@@ -47,6 +47,7 @@ router.get('/', isLoggedIn, function (req, _res, next) {
     //transform arrays
     var loggedUserId = req.user.id;
     var loggedUserRank = -1;
+    var loggedUserPoints = req.user.points;
 
     //user -> add rank attr and self
     var rank = 0,
@@ -66,7 +67,8 @@ router.get('/', isLoggedIn, function (req, _res, next) {
         points: user.points,
         self: user.id == loggedUserId,
         wins: user.wins.length,
-        losts: user.losses.length
+        losts: user.losses.length,
+        probabilityOfWin: elo.expectedScore(loggedUserPoints, user.points).toFixed(2)
       }
     });
 
