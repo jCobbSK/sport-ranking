@@ -8,6 +8,11 @@
                 Match history
             </a>
         </li>
+        <li {{#ifCond tab '==' 'tournaments'}}class="active"{{/ifCond}}>
+            <a href="/">
+                Tournaments <span class="badge">Coming soon</span>
+            </a>
+        </li>
         <div class="pull-right">
             <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#add-match-modal">
                 <i class="fa fa-plus"></i>
@@ -23,6 +28,10 @@
 
         {{#ifCond tab '==' 'matches'}}
           {{> matches-tab}}
+        {{/ifCond}}
+
+        {{#ifCond tab '==' 'tournaments'}}
+          {{> tournaments-tab}}
         {{/ifCond}}
 
     </div>

@@ -107,7 +107,8 @@ router.get('/matches', isLoggedIn, function(req, _res, next){
       ],
       limit: 10,
       offset: 10 * actualPage
-    })
+    }),
+    db.User.findAll()
   ]).then(function(res) {
 
     var loggedUserId = req.user.id;
@@ -138,7 +139,8 @@ router.get('/matches', isLoggedIn, function(req, _res, next){
       tab: 'matches',
       matches: matches,
       matchPages: Math.ceil(res[0].count / 10),
-      actualPage: actualPage
+      actualPage: actualPage,
+      users: res[1]
     });
   }).catch(function(err) {
     console.error(err);
