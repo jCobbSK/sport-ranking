@@ -1,0 +1,35 @@
+{
+  "development": {
+    "username": "jakubkanitra",
+    "password": "roh4dZi3",
+    "database": "sport-ranking",
+    "host": "127.0.0.1",
+    "dialect": "postgres"
+  },
+  "test": {
+    "username": "jakubkanitra",
+    "password": "roh4dZi3",
+    "database": "sport-ranking",
+    "host": "127.0.0.1",
+    "dialect": "postgres"
+  },
+  "production": {
+    "username": "",
+    "password": "",
+    "database": "",
+    "host": "127.0.0.1",
+    "dialect": "postgres"
+  },
+  "facebookSettings": {
+    "development": {
+      "FACEBOOK_APP_ID": 1611295705809038,
+      "FACEBOOK_APP_SECRET": "dd65faa81506c9bed6c17af52a03c752",
+      "callback": "http://localhost:3500/auth/facebook/callback"
+    },
+    "production": {
+      "FACEBOOK_APP_ID": "",
+      "FACEBOOK_APP_SECRET": "",
+      "callback": ""
+    }
+  }
+}
