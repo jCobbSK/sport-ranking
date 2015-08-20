@@ -6,7 +6,14 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.INTEGER,
       defaultValue: 1600
     },
-    facebook_token: DataTypes.STRING
+    facebook_token: DataTypes.STRING,
+    xp: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0
+    },
+    photo: {
+      type: DataTypes.STRING
+    }
   }, {
     classMethods: {
       associate: function(models) {
