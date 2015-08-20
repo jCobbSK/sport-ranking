@@ -2,23 +2,11 @@ var passport = require('passport'),
     cookieParser = require('cookie-parser'),
     session = require('express-session'),
     FacebookStrategy = require('passport-facebook'),
-    db = require('../app/models');
+    db = require('../app/models'),
+    facebookSettings = require('./config.json')['facebookSettings'];
 
 module.exports = function(app) {
-  var FACEBOOK_SETTINGS = {
-    development: {
-      FACEBOOK_APP_ID: 1611295705809038,
-      FACEBOOK_APP_SECRET: 'dd65faa81506c9bed6c17af52a03c752',
-      callback: 'http://localhost:3500/auth/facebook/callback'
-    },
-    production: {
-      FACEBOOK_APP_ID: "1595898494015426",
-      FACEBOOK_APP_SECRET: "36a84365ec849abc1a2c29e65b56e2b3",
-      callback: 'http://www.jcobb.me/auth/facebook/callback'
-    }
-  };
-
-  var actualFcbConf = (process.env.NODE_ENV == 'production') ? FACEBOOK_SETTINGS['production'] : FACEBOOK_SETTINGS['development'];
+  var actualFcbConf = (process.env.NODE_ENV == 'production') ? facebookSettings['production'] : facebookSettings['development'];
   passport.serializeUser(function(user, done) {
     console.log('serializing', user.id);
     done(null, user.id);

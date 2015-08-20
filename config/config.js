@@ -27,7 +27,7 @@ var config = {
       name: 'documents'
     },
     port: 3500,
-    db: 'postgres://postgres:roh4dZi3@localhost/sport-ranking'
+    db: 'postgres://:@localhost/sport-ranking'
   }
 };
 
