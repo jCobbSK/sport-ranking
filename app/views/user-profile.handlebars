@@ -1,0 +1,57 @@
+<div class="container" style="width: 960px;">
+    <div class="row">
+        <div class="col-md-4 col-sm-4 hidden-xs col-lg-4" style="text-align: center;">
+            <!-- photo here -->
+            <img style="height: 200px;" src="https://fbcdn-profile-a.akamaihd.net/hprofile-ak-xta1/v/t1.0-1/p200x200/10696334_10202611977044609_3337319871583583771_n.jpg?oh=8a7c184ed4a1f6eb297e6dbda6799bab&oe=563E8658&__gda__=1447203111_d6e1ff434bb94345e40f3194ed543742" alt="" class="img-rounded">
+        </div>
+        <div class="col-md-8 col-sm-8 hidden-xs col-lg-8">
+            <!-- stats here -->
+            <h2>Jakub Kanitra</h2>
+            <h3>Rank: 1 (12points)</h3>
+            <h3>W/L: 14/2</h3>
+        </div>
+        <div class="hidden-lg hidden-md hidden-sm col-xs-12">
+            <h4>Jakub Kanitra</h4>
+            <h5>Rank: 1 (12points)</h5>
+            <h5>W/L: 14/2</h5>
+        </div>
+    </div>
+    <div class="row">
+        <ul class="nav nav-tabs" role="tablist">
+            <li role="presentation" class="active"><a href="#matches" aria-controls="matches" role="tab" data-toggle="tab">Matches</a></li>
+            <li role="presentation"><a href="#points" aria-controls="points" role="tab" data-toggle="tab">Points</a></li>
+            <li role="presentation"><a href="#tournaments" aria-controls="tournaments" role="tab" data-toggle="tab">Tournaments</a></li>
+        </ul>
+
+        <!-- Tab panes -->
+        <div class="tab-content">
+            <div role="tabpanel" class="tab-pane active" id="matches">
+                <!-- Match history table -->
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>1st player</th>
+                        <th>Result</th>
+                        <th>2nd player</th>
+                        <th>Time</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {{#each matches}}
+                        <tr class="{{#if winner}}success{{/if}} {{#if looser}}danger{{/if}}">
+                            <td {{#if submitterIsWinner}}class="bold-text"{{/if}}>{{submitter.name}} ({{submitter.points}})</td>
+                            <td>{{result}}</td>
+                            <td {{#unless submitterIsWinner}}class="bold-text"{{/unless}}>{{other.name}} ({{other.points}})</td>
+                            <td class="timed-var" data-time="{{createdAt}}">{{createdAt}}</td>
+                        </tr>
+                    {{/each}}
+                    </tbody>
+                </table>
+            </div>
+            <div role="tabpanel" class="tab-pane" id="points">
+                Here will be graph with the points progress
+            </div>
+            <div role="tabpanel" class="tab-pane" id="tournaments">Coming soon</div>
+        </div>
+    </div>
+</div>

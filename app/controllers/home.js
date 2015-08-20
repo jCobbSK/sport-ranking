@@ -31,6 +31,10 @@ router.get('/logout', function(req, res, next){
   res.redirect('/');
 });
 
+router.get('/users/:id', isLoggedIn, function(req, res){
+  res.render('user-profile');
+});
+
 router.get('/', isLoggedIn, function (req, _res, next) {
 
   q.all([
