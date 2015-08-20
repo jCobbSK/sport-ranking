@@ -7,7 +7,6 @@
             <th>Name</th>
             <th>Points</th>
             <th>W/L</th>
-            <th>% of wining</th>
         </tr>
         </thead>
         <tbody>
@@ -17,11 +16,6 @@
                 <td>{{name}}</td>
                 <td>{{points}}</td>
                 <td>{{wins}} / {{losts}}</td>
-                <td>
-                  {{#unless self}}
-                    {{probabilityOfWin}}%
-                  {{/unless}}
-                </td>
             </tr>
         {{/each}}
         {{#if notRankedUsers.length}}
@@ -36,7 +30,6 @@
                     <td>{{name}}</td>
                     <td>{{points}}</td>
                     <td>{{wins}} / {{losts}}</td>
-                    <td></td>
                 </tr>
             {{/each}}
         {{/if}}
