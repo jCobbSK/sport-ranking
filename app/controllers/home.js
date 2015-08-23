@@ -5,7 +5,8 @@ var express = require('express'),
   q = require('q'),
   Elo = require('arpad'),
   matchManagement = require('../lib/matchManagement'),
-  validator = require('validator');
+  validator = require('validator'),
+  modelHelpers = require('../lib/modelHelpers');
 
 var elo = new Elo();
 
@@ -31,8 +32,50 @@ router.get('/logout', function(req, res, next){
   res.redirect('/');
 });
 
-router.get('/users/:id', isLoggedIn, function(req, res){
-  res.render('user-profile');
+router.get('/users/:id', isLoggedIn, function(req, _res){
+  //user's profile & all matches
+  var usersId =req.params.id;
+  q.all([
+    db.Match.findAll({
+      order: '"createdAt" DESC',
+      include: [
+        {model: db.User, as: 'winner'},
+        {model: db.User, as: 'looser'},
+        {model: db.User, as: 'submitter'}
+      ],
+      where: {
+        $or: [
+          {winner_id: usersId},
+          {looser_id: usersId}
+        ]
+      }
+    }),
+    db.User.findAll({
+      order: 'points DESC',
+      include: [
+        {model: db.Match, as: 'wins'},
+        {model: db.Match, as: 'losses'}
+      ]
+    })
+  ]).then(function(res){
+    //calculate statistics
+    var stats = matchManagement.calcStatistics(usersId, res[0]);
+    var matches = modelHelpers.matchesTransform(usersId, res[0]);
+    var users = modelHelpers.usersTransform(usersId, res[1]);
+    var actualUser = users.users.filter(function(u){
+      return u.id == usersId;
+    })[0];
+    actualUser.rank = users.loggedUserRank;
+
+    _res.render('user-profile',{
+      user: actualUser,
+      stats: stats,
+      matches: matches,
+      users: users.users
+    });
+  }).catch(function(err){
+    res.sendStatus(401);
+  });
 });
 
 router.get('/', isLoggedIn, function (req, _res, next) {
@@ -50,35 +93,13 @@ router.get('/', isLoggedIn, function (req, _res, next) {
 
     //transform arrays
     var loggedUserId = req.user.id;
-    var loggedUserRank = -1;
+    var result = modelHelpers.usersTransform(loggedUserId, res[0]);
 
-    //user -> add rank attr and self
-    var rank = 0,
-      points = 100000;
-    var users = res[0].map(function(user) {
-      if (user.points < points && (user.wins.length != 0|| user.losses.length != 0)) {
-        rank++;
-        points = user.points;
-      }
-
-      if (user.id == loggedUserId)
-        loggedUserRank = rank;
-      return {
-        id: user.id,
-        rank: rank,
-        name: user.name,
-        points: user.points,
-        self: user.id == loggedUserId,
-        wins: user.wins.length,
-        losts: user.losses.length
-      }
-    });
-
-    var notRankedUsers = users.filter(function(user){
+    var notRankedUsers = result.users.filter(function(user){
       return user.wins == 0 && user.losts == 0;
     });
 
-    var users = users.filter(function(user){
+    var users = result.users.filter(function(user){
       return user.wins != 0 || user.losts != 0;
     });
 
@@ -90,7 +111,7 @@ router.get('/', isLoggedIn, function (req, _res, next) {
       showResult: req.query.showResult == 'true',
       submitPoints: req.query.submitPoints,
       hasWon: req.query.hasWon == 'true',
-      actualRank: loggedUserRank,
+      actualRank: result.loggedUserRank,
     });
   }).catch(function(err) {
     console.error(err);
@@ -117,27 +138,7 @@ router.get('/matches', isLoggedIn, function(req, _res, next){
 
     var loggedUserId = req.user.id;
     //matches
-    var matches = res[0].rows.map(function(match) {
-      var winner = {
-        name: match.winner.name,
-        points: match.winner_points
-      };
-
-      var looser = {
-        name: match.looser.name,
-        points: match.looser_points
-      };
-
-      return {
-        submitter: (match.submitter_id == match.winner_id) ? winner : looser,
-        submitterIsWinner: match.submitter_id == match.winner_id,
-        other: (match.submitter_id == match.winner_id) ? looser : winner,
-        createdAt: match.createdAt,
-        result: match.score,
-        winner: match.winner_id == loggedUserId,
-        looser: match.looser_id == loggedUserId
-      }
-    });
+    var matches = modelHelpers.matchesTransform(loggedUserId, res[0].rows);
 
     _res.render('index', {
       title: 'Connect ping-pong league',
