@@ -104,7 +104,6 @@ router.get('/', isLoggedIn, function (req, _res, next) {
     });
 
     _res.render('index', {
-      title: 'Connect ping-pong league',
       tab: 'users',
       users: users,
       notRankedUsers: notRankedUsers,
