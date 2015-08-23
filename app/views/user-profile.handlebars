@@ -87,7 +87,11 @@
                 </table>
             </div>
             <div role="tabpanel" class="tab-pane" id="points">
-                Here will be graph with the points progress
+                <div class="row">
+                    <div class="col-xs-8 col-xs-offset-2">
+                        <div id="container"></div>
+                    </div>
+                </div>
             </div>
             <div role="tabpanel" class="tab-pane" id="tournaments">Coming soon</div>
         </div>
@@ -122,5 +126,48 @@
         });
 
         $('#match-filter').trigger('change');
+
+        $('#container').highcharts({
+            chart: {
+                zoomType: 'x'
+            },
+
+            title: {
+                text: 'Point progress',
+                x: -20 //center
+            },
+            subtitle: {
+                text: '',
+                x: -20
+            },
+            xAxis: {
+                type: 'datetime'
+            },
+            yAxis: {
+                title: {
+                    text: 'Points'
+                },
+                plotLines: [{
+                    value: 0,
+                    width: 1,
+                    color: '#808080'
+                }]
+            },
+            tooltip: {
+                valueSuffix: 'points'
+            },
+            legend: {
+                layout: 'vertical',
+                align: 'right',
+                verticalAlign: 'middle',
+                borderWidth: 0
+            },
+            series: [{
+                name: 'points',
+                data: {{pointHistory}}
+            }]
+        });
     })
+
+
 </script>

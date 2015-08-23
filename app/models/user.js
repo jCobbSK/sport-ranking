@@ -32,6 +32,11 @@ module.exports = function(sequelize, DataTypes) {
           foreignKey: 'submitter_id',
           as: 'submits'
         });
+
+        User.hasMany(models.PointHistory, {
+          foreignKey: 'user_id',
+            as: 'pointHistory'
+        });
       }
     }
   });

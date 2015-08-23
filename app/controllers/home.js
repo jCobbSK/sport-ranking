@@ -6,7 +6,8 @@ var express = require('express'),
   Elo = require('arpad'),
   matchManagement = require('../lib/matchManagement'),
   validator = require('validator'),
-  modelHelpers = require('../lib/modelHelpers');
+  modelHelpers = require('../lib/modelHelpers'),
+  moment = require('moment');
 
 var elo = new Elo();
 
@@ -56,6 +57,12 @@ router.get('/users/:id', isLoggedIn, function(req, _res){
         {model: db.Match, as: 'wins'},
         {model: db.Match, as: 'losses'}
       ]
+    }),
+    db.PointHistory.findAll({
+      order: '"createdAt" ASC',
+      where: {
+        user_id: usersId
+      }
     })
   ]).then(function(res){
     //calculate statistics
@@ -71,7 +78,13 @@ router.get('/users/:id', isLoggedIn, function(req, _res){
       user: actualUser,
       stats: stats,
       matches: matches,
-      users: users.users
+      users: users.users,
+      pointHistory: JSON.stringify(res[2].map(function(obj){
+        return [
+          moment(obj.originCreatedAt).unix()*1000,
+          obj.points
+        ]
+      }))
     });
   }).catch(function(err){
     res.sendStatus(401);
@@ -233,6 +246,14 @@ router.post('/add_match', isLoggedIn, function(req, _res, next) {
         score: scoreString,
         winner_points: winDiff,
         looser_points: lostDiff
+      }),
+      db.PointHistory.create({
+        user_id: winner.id,
+        points: parseInt(winner.points) + parseInt(winDiff)
+      }),
+      db.PointHistory.create({
+        user_id: looser.id,
+        points: parseInt(looser.points) + parseInt(lostDiff)
       })
     ]).then(function(){
       //redirect with change data

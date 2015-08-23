@@ -1,6 +1,8 @@
 'use strict';
 
-var request = require('request');
+var request = require('request'),
+  db = require('./app/models'),
+  q = require('q');
 
 module.exports = function (grunt) {
   // show elapsed time at the end
@@ -72,6 +74,55 @@ module.exports = function (grunt) {
           done(reloaded);
         });
     }, 500);
+  });
+
+  grunt.registerTask('init-point-history', 'Initialize point history table', function(){
+    var done = this.async();
+    var users = {};
+    db.Match.findAll({
+      order: '"createdAt" ASC',
+      include: [
+        {model: db.User, as: 'winner'},
+        {model: db.User, as: 'looser'}
+      ]
+    }).then(function(res){
+      var createPromises = [];
+      for (var i= 0, len=res.length;i<len;i++) {
+        var match = res[i];
+        if (!users[match.winner.id])
+          users[match.winner.id] = 1600;
+        if (!users[match.looser.id])
+          users[match.looser.id] = 1600;
+
+        users[match.winner.id] += match.winner_points;
+        users[match.looser.id] += match.looser_points;
+        createPromises.push(
+          db.PointHistory.create({
+            user_id: match.winner.id,
+            points: users[match.winner.id],
+            originCreatedAt: match.createdAt
+          })
+        );
+        createPromises.push(
+          db.PointHistory.create({
+            user_id: match.looser.id,
+            points: users[match.looser.id],
+            originCreatedAt: match.createdAt
+          })
+        );
+      }
+
+      q.all(createPromises).then(function(){
+        console.log('Created');
+        done(err);
+      }).catch(function(err){
+        console.error(err);
+        done(err);
+      })
+    }).catch(function(err){
+      console.error(err);
+      done(err);
+    })
   });
 
   grunt.registerTask('default', [
