@@ -5,4 +5,5 @@ public/components
 config/config.js
 config/config.json
 public/.DS_Store
+public/img/.DS_Store
 
