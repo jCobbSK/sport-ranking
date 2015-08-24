@@ -107,6 +107,13 @@ router.get('/', isLoggedIn, function (req, _res, next) {
     //transform arrays
     var loggedUserId = req.user.id;
     var result = modelHelpers.usersTransform(loggedUserId, res[0]);
+    var loggedUserPoints = req.user.points;
+
+    //calculate possible point addition if won
+    result.users = result.users.map(function(user){
+      user['possiblePointAddition'] = elo.newRatingIfWon(loggedUserPoints, user.points) - loggedUserPoints;
+      return user;
+    });
 
     var notRankedUsers = result.users.filter(function(user){
       return user.wins == 0 && user.losts == 0;

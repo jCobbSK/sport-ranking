@@ -7,6 +7,7 @@
             <th>Name</th>
             <th>Points</th>
             <th>W/L</th>
+            <th>Points for win</th>
         </tr>
         </thead>
         <tbody>
@@ -16,6 +17,7 @@
                 <td><a href="/users/{{id}}">{{name}}</a></td>
                 <td>{{points}}</td>
                 <td>{{wins}} / {{losts}}</td>
+                <td>{{#unless self}}{{possiblePointAddition}}{{/unless}}</td>
             </tr>
         {{/each}}
         {{#if notRankedUsers.length}}
