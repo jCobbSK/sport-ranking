@@ -279,6 +279,12 @@ router.get('/tournaments', isLoggedIn, function(req, res) {
   })
 });
 
+router.get('/tournaments/:id', isLoggedIn, function(req, res) {
+  res.render('tournament', {
+
+  });
+});
+
 function isLoggedIn(req, res, next) {
   if (req.isAuthenticated())
     return next();

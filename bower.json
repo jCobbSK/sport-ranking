@@ -9,6 +9,7 @@
   "dependencies": {
     "bootstrap": "~3.3.5",
     "bootstrap-select": "~1.7.3",
+    "challonge-jquery-plugin": "https://github.com/challonge/challonge-jquery-plugin.git#~0.1.1",
     "eonasdan-bootstrap-datetimepicker": "~4.15.35",
     "fontawesome": "~4.4.0",
     "highcharts": "~4.1.8",
