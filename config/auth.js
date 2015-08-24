@@ -2,23 +2,11 @@ var passport = require('passport'),
     cookieParser = require('cookie-parser'),
     session = require('express-session'),
     FacebookStrategy = require('passport-facebook'),
-    db = require('../app/models');
+    db = require('../app/models'),
+    facebookSettings = require('./config.json')['facebookSettings'];
 
 module.exports = function(app) {
-  var FACEBOOK_SETTINGS = {
-    development: {
-      FACEBOOK_APP_ID: 1611295705809038,
-      FACEBOOK_APP_SECRET: 'dd65faa81506c9bed6c17af52a03c752',
-      callback: 'http://localhost:3500/auth/facebook/callback'
-    },
-    production: {
-      FACEBOOK_APP_ID: "1595898494015426",
-      FACEBOOK_APP_SECRET: "36a84365ec849abc1a2c29e65b56e2b3",
-      callback: 'http://www.jcobb.me/auth/facebook/callback'
-    }
-  };
-
-  var actualFcbConf = (process.env.NODE_ENV == 'production') ? FACEBOOK_SETTINGS['production'] : FACEBOOK_SETTINGS['development'];
+  var actualFcbConf = (process.env.NODE_ENV == 'production') ? facebookSettings['production'] : facebookSettings['development'];
   passport.serializeUser(function(user, done) {
     console.log('serializing', user.id);
     done(null, user.id);
@@ -35,7 +23,7 @@ module.exports = function(app) {
       clientID: actualFcbConf.FACEBOOK_APP_ID,
       clientSecret: actualFcbConf.FACEBOOK_APP_SECRET,
       callbackURL: actualFcbConf.callback,
-      profileFields: ['id', 'displayName']
+      profileFields: ['id', 'displayName', 'picture.type(large)']
     },
     function(accessToken, refreshToken, profile, done){
       console.log(profile);
@@ -44,12 +32,24 @@ module.exports = function(app) {
           if (!user) {
             db.User.create({
               facebook_token: profile.id,
-              name: profile.displayName
+              name: profile.displayName,
+              photo: profile.photos[0].value
             }).then(function(user){
               return done(null, user);
             });
           } else {
-            return done(null, user);
+            if (user.photo != profile.photos[0].value || user.name != profile.displayName) {
+              user.updateAttributes({
+                photo: profile.photos[0].value,
+                name: profile.displayName
+              }).then(function(user){
+                return done(null, user);
+              }).catch(function(err){
+                return done(err);
+              })
+            } else {
+              return done(null, user);
+            }
           }
         });
     }

@@ -1,0 +1,179 @@
+<div class="container">
+    <div class="row">
+        <div class="col-sm-3 col-xs-12">
+            <div class="row">
+                <div class="col-sm-12 col-xs-6">
+                    <!-- photo here -->
+                    <div style="text-align: center;">
+                        <img style="width: 80%;" src={{#if user.photo}}{{user.photo}}{{else}}"/img/unknown-user.jpg"{{/if}}>
+                    </div>
+                </div>
+                <div class="col-sm-12 col-xs-6">
+                    <div>
+                        <!-- stats here -->
+                        <h3 style="font-weight: bold;">{{user.name}}</h3>
+                        <h4>Rank: {{user.rank}} ({{user.points}}points)</h4>
+                        <h4>Wins: {{user.wins}}</h4>
+                        <h4>Losts: {{user.losts}}</h4>
+                    </div>
+                    <h2>Stats:</h2>
+                    <table class="table">
+                        <tbody>
+                        <tr>
+                            <td>Longest win streak:</td>
+                            <td>{{stats.winStreak}}</td>
+                        </tr>
+                        <tr>
+                            <td>Longest loose streak:</td>
+                            <td>{{stats.looseStreak}}</td>
+                        </tr>
+                        <tr>
+                            <td>Most wins against:</td>
+                            <td>{{stats.mostWinsAgainst}}</td>
+                        </tr>
+                        <tr>
+                            <td>Most losts against:</td>
+                            <td>{{stats.mostLostsAgainst}}</td>
+                        </tr>
+                        <tr>
+                            <td>Favourite oponent:</td>
+                            <td>{{stats.favouritePlayer}}</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-9 col-xs-12">
+            <ul class="nav nav-tabs" role="tablist">
+                <li role="presentation" class="active"><a href="#matches" aria-controls="matches" role="tab" data-toggle="tab">Matches</a></li>
+                <li role="presentation"><a href="#points" aria-controls="points" role="tab" data-toggle="tab">Points</a></li>
+                <li role="presentation"><a href="#tournaments" aria-controls="tournaments" role="tab" data-toggle="tab">Tournaments</a></li>
+            </ul>
+
+            <!-- Tab panes -->
+            <div class="tab-content" style="margin-top: 10px;">
+                <div role="tabpanel" class="tab-pane active" id="matches">
+                    <!-- Match history table -->
+                    <div class="row center-block">
+                        <div class="col-md-5 col-md-offset-3">
+                            <div class="input-group">
+                                <select id="match-filter" class=" form-control selectpicker" data-live-search="true">
+                                    <option value="">No filter</option>
+                                  {{#each users}}
+                                    {{#ifCond id '!=' ../user.id}}
+                                        <option value="{{id}}" data-tokens="{{stripAccents name}}">{{name}}</option>
+                                    {{/ifCond}}
+                                  {{/each}}
+                                </select>
+                                <div id="filter-stats" class="input-group-addon">W:10 L:2</div>
+                            </div>
+                        </div>
+                    </div>
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th>1st player</th>
+                            <th>Result</th>
+                            <th>2nd player</th>
+                            <th>Time</th>
+                        </tr>
+                        </thead>
+                        <tbody id="matches-container">
+                        {{#each matches}}
+                            <tr class="{{#if winner}}success{{/if}} {{#if looser}}danger{{/if}}" data-userIds="{{submitter.id}} {{other.id}}">
+                                <td {{#if submitterIsWinner}}class="bold-text"{{/if}}><a href="/users/{{submitter.id}}">{{submitter.name}}</a> ({{submitter.points}})</td>
+                                <td>{{result}}</td>
+                                <td {{#unless submitterIsWinner}}class="bold-text"{{/unless}}><a href="/users/{{other.id}}">{{other.name}}</a> ({{other.points}})</td>
+                                <td class="timed-var" data-time="{{createdAt}}">{{createdAt}}</td>
+                            </tr>
+                        {{/each}}
+                        </tbody>
+                    </table>
+                </div>
+                <div role="tabpanel" class="tab-pane" id="points">
+                    <div class="row">
+                        <div class="col-xs-8 col-xs-offset-2">
+                            <div id="container"></div>
+                        </div>
+                    </div>
+                </div>
+                <div role="tabpanel" class="tab-pane" id="tournaments">Coming soon</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function(){
+        setupTimers();
+
+        $("#match-filter").change(function(){
+            var filteringId = $(this).val();
+            $('#matches-container tr').each(function(){
+                if (!filteringId) {
+                    $(this).show()
+                } else {
+                    if ($(this).data('userids').split(' ').indexOf(filteringId) == -1)
+                        $(this).hide();
+                    else
+                        $(this).show();
+                }
+            })
+
+            var losts = $('#matches-container .danger').filter(function(){
+                return $(this).is(':visible');
+            }).length;
+            var wins = $('#matches-container .success').filter(function(){
+                return $(this).is(':visible');
+            }).length;
+
+            $('#filter-stats').html('W:'+wins+' L:'+losts);
+        });
+
+        $('#match-filter').trigger('change');
+
+        $('#container').highcharts({
+            chart: {
+                zoomType: 'x'
+            },
+
+            title: {
+                text: 'Point progress',
+                x: -20 //center
+            },
+            subtitle: {
+                text: '',
+                x: -20
+            },
+            xAxis: {
+                type: 'datetime'
+            },
+            yAxis: {
+                title: {
+                    text: 'Points'
+                },
+                plotLines: [{
+                    value: 0,
+                    width: 1,
+                    color: '#808080'
+                }]
+            },
+            tooltip: {
+                valueSuffix: 'points'
+            },
+            legend: {
+                layout: 'vertical',
+                align: 'right',
+                verticalAlign: 'middle',
+                borderWidth: 0
+            },
+            series: [{
+                name: 'points',
+                data: {{pointHistory}}
+            }]
+        });
+    })
+
+
+</script>

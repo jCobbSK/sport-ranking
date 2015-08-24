@@ -13,12 +13,12 @@
                         <select class="form-control selectpicker" data-live-search="true" name="oponent">
                           {{#each users}}
                             {{#unless self}}
-                                <option value="{{id}}">{{name}}</option>
+                                <option data-tokens="{{stripAccents name}}" value="{{id}}">{{name}}</option>
                             {{/unless}}
                           {{/each}}
                           {{#each notRankedUsers}}
                             {{#unless self}}
-                                <option value="{{id}}">{{name}}</option>
+                                <option data-tokens="{{stripAccents name}}" value="{{id}}">{{name}}</option>
                             {{/unless}}
                           {{/each}}
                         </select>

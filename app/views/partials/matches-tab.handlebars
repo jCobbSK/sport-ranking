@@ -12,9 +12,9 @@
         <tbody>
         {{#each matches}}
             <tr class="{{#if winner}}success{{/if}} {{#if looser}}danger{{/if}}">
-                <td {{#if submitterIsWinner}}class="bold-text"{{/if}}>{{submitter.name}} ({{submitter.points}})</td>
+                <td {{#if submitterIsWinner}}class="bold-text"{{/if}}><a href="/users/{{submitter.id}}">{{submitter.name}}</a> ({{submitter.points}})</td>
                 <td>{{result}}</td>
-                <td {{#unless submitterIsWinner}}class="bold-text"{{/unless}}>{{other.name}} ({{other.points}})</td>
+                <td {{#unless submitterIsWinner}}class="bold-text"{{/unless}}><a href="/users/{{other.id}}">{{other.name}}</a> ({{other.points}})</td>
                 <td class="timed-var" data-time="{{createdAt}}">{{createdAt}}</td>
             </tr>
         {{/each}}

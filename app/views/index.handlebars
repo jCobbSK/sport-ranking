@@ -58,17 +58,7 @@
 <script>
     $(document).ready(function(){
 
-        function calculateTime() {
-            $('.timed-var').each(function(){
-                var time = $(this).data('time');
-                $(this).html(moment(time).fromNow());
-            });
-        }
-
-        calculateTime();
-        setInterval(function(){
-          calculateTime();
-        }, 5000);
+        setupTimers();
 
         $('.last-score-notif').click(function(){
             $('.last-score-notif').hide();
