@@ -243,6 +243,12 @@ router.post('/add_match', isLoggedIn, function(req, _res, next) {
   });
 });
 
+router.get('/tournaments', isLoggedIn, function(req, res) {
+  res.render('index',{
+    tab: 'tournaments'
+  })
+});
+
 function isLoggedIn(req, res, next) {
   if (req.isAuthenticated())
     return next();

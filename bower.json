@@ -8,8 +8,9 @@
   ],
   "dependencies": {
     "bootstrap": "~3.3.5",
+    "bootstrap-select": "~1.7.3",
+    "eonasdan-bootstrap-datetimepicker": "~4.15.35",
     "fontawesome": "~4.4.0",
-    "moment": "~2.10.6",
-    "bootstrap-select": "~1.7.3"
+    "moment": "~2.10.6"
   }
 }

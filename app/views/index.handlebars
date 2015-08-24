@@ -9,7 +9,7 @@
             </a>
         </li>
         <li {{#ifCond tab '==' 'tournaments'}}class="active"{{/ifCond}}>
-            <a href="/">
+            <a href="/tournaments">
                 Tournaments <span class="badge">Coming soon</span>
             </a>
         </li>
@@ -38,6 +38,8 @@
 </div>
 
 {{> add-modal}}
+
+{{> create-tournament-modal}}
 
 <!-- notification small modal -->
 {{#ifCond tab '==' 'users'}}
@@ -72,7 +74,9 @@
             $('.last-score-notif').hide();
         });
 
-
+        $('#tournament-start').datetimepicker({
+            defaultDate: moment()
+        });
     });
 
 
