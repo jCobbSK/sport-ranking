@@ -37,6 +37,22 @@ module.exports = function(sequelize, DataTypes) {
           foreignKey: 'user_id',
             as: 'pointHistory'
         });
+
+        User.hasMany(models.Tournament, {
+          foreignKey: 'creator_id',
+          as: 'createdTournaments'
+        });
+
+        User.hasMany(models.Tournament, {
+          foreignKey: 'winner_id',
+          as: 'wonTournaments'
+        });
+
+        User.hasMany(models.Participant, {
+          foreignKey: 'user_id',
+          as: 'participants'
+        });
+
       }
     }
   });
