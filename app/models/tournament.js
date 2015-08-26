@@ -8,7 +8,8 @@ module.exports = function(sequelize, DataTypes) {
     cancelled: DataTypes.BOOLEAN,
     winner_id: DataTypes.INTEGER,
     challonge_url: DataTypes.STRING,
-    challonge_id: DataTypes.INTEGER
+    challonge_id: DataTypes.INTEGER,
+    startsAt: DataTypes.DATE
   }, {
     classMethods: {
       associate: function(models) {
