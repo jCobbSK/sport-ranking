@@ -72,7 +72,7 @@ router.get('/users/:id', isLoggedIn, function(req, _res){
     var actualUser = users.users.filter(function(u){
       return u.id == usersId;
     })[0];
-    actualUser.rank = users.loggedUserRank;
+    actualUser.rank = (actualUser.wins > 0 || actualUser.losts > 0) ? users.loggedUserRank : '';
 
     _res.render('user-profile',{
       user: actualUser,
