@@ -7,7 +7,8 @@ var express = require('express'),
   matchManagement = require('../lib/matchManagement'),
   validator = require('validator'),
   modelHelpers = require('../lib/modelHelpers'),
-  moment = require('moment');
+  moment = require('moment'),
+  challongeIntegration = require('../lib/challonge-integration');
 
 var elo = new Elo();
 
@@ -284,6 +285,14 @@ router.get('/tournaments/:id', isLoggedIn, function(req, res) {
 
   });
 });
+
+router.post('/add_tournament', isLoggedIn, function(req, res) {
+  var name = req.body['tournament-name'],
+    type = req.body['tournament-type'],
+    note = req.body['tournament-note'],
+    startsAt = req.body['tournament-start'];
+  //TODO challongeIntegration.createTournament();
+})
 
 function isLoggedIn(req, res, next) {
   if (req.isAuthenticated())
