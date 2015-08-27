@@ -112,6 +112,7 @@ router.get('/', isLoggedIn, function (req, _res, next) {
     //calculate possible point addition if won
     result.users = result.users.map(function(user){
       user['possiblePointAddition'] = elo.newRatingIfWon(loggedUserPoints, user.points) - loggedUserPoints;
+      user['possiblePointLoose'] = elo.newRatingIfLost(loggedUserPoints, user.points) - loggedUserPoints;
       return user;
     });
 
