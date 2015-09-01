@@ -91,7 +91,7 @@
                                 <td {{#if submitterIsWinner}}class="bold-text"{{/if}}><a href="/users/{{submitter.id}}">{{submitter.name}}</a> ({{submitter.points}})</td>
                                 <td>{{result}}</td>
                                 <td {{#unless submitterIsWinner}}class="bold-text"{{/unless}}><a href="/users/{{other.id}}">{{other.name}}</a> ({{other.points}})</td>
-                                <td class="timed-var" data-time="{{createdAt}}">{{createdAt}}</td>
+                                <td class="timed-var" data-time="{{createdAt}}" alt="{{createdAt}}" title="{{createdAt}}">{{createdAt}}</td>
                             </tr>
                         {{/each}}
                         </tbody>

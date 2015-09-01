@@ -16,7 +16,7 @@
                 <td>{{result}}</td>
                 <td {{#unless submitterIsWinner}}class="bold-text"{{/unless}}><a href="/users/{{other.id}}">{{other.name}}</a> ({{other.points}})</td>
                 <td>
-                  <span class="timed-var" data-time="{{createdAt}}">{{createdAt}}</span>
+                  <span class="timed-var" data-time="{{createdAt}}" alt="{{createdAt}}" title="{{createdAt}}">{{createdAt}}</span>
                   {{#ifCond winner '||' looser}}
                     {{#ifCond @index '==' '0'}}
                         <a class="btn btn-danger" href="/requestDeleteMatch" style="float: right;">Delete</a>
