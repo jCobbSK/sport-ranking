@@ -2,7 +2,8 @@
 
 var request = require('request'),
   db = require('./app/models'),
-  q = require('q');
+  q = require('q'),
+  modelHelpers = require('./app/lib/modelHelpers');
 
 module.exports = function (grunt) {
   // show elapsed time at the end
@@ -122,6 +123,19 @@ module.exports = function (grunt) {
     }).catch(function(err){
       console.error(err);
       done(err);
+    })
+  });
+
+  grunt.registerTask('remove-last-match', 'remove last match and update user points and history', function(){
+    var done = this.async();
+    q.all([
+      modelHelpers.removeLastMatch()
+    ]).then(function(){
+      console.log('Deleted.');
+      done();
+    }).catch(function(err){
+      console.error(err);
+      done();
     })
   });
 

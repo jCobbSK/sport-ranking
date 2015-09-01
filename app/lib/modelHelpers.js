@@ -1,3 +1,6 @@
+var db = require('../models'),
+  q = require('q');
+
 module.exports = {
   matchesTransform: function(loggedUserId, matches) {
     var res = matches.map(function(match) {
@@ -57,5 +60,71 @@ module.exports = {
       users: res,
       loggedUserRank: loggedUserRank
     };
+  },
+
+  /**
+   * Removes last match, point histories and update actual user points.
+   * @returns {Q.promise}
+   */
+  removeLastMatch: function() {
+
+    var deffered = q.defer();
+    //remove match, remove point histories of both players, update players points
+    q.all([
+      db.Match.findAll({
+        order: '"createdAt" DESC',
+        include: [
+          {model: db.User, as: 'winner'},
+          {model: db.User, as: 'looser'}
+        ],
+        limit: 1
+      }),
+      db.PointHistory.findAll({
+        order: '"createdAt" DESC',
+        limit: 2
+      })
+    ])
+      .then(function(data){
+        var promises = [];
+
+        //update user points
+        promises.push(
+          data[0][0].winner.updateAttributes({
+            points: data[0][0].winner.points - data[0][0].winner_points
+          })
+        );
+
+        promises.push(
+          data[0][0].looser.updateAttributes({
+            points: data[0][0].looser.points - data[0][0].looser_points
+          })
+        );
+
+        //remove pointhistories
+        promises.push(
+          data[1][0].destroy()
+        );
+
+        promises.push(
+          data[1][1].destroy()
+        );
+
+        //remove match
+        promises.push(
+          data[0][0].destroy()
+        );
+
+        q.all(promises)
+          .then(function(data){
+            deffered.resolve(data);
+          })
+          .catch(function(err){
+            deffered.reject(err);
+          });
+      })
+      .catch(function(err){
+        deffered.reject(err);
+      })
+    return deffered.promise;
   }
 }

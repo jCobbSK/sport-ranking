@@ -274,6 +274,50 @@ router.post('/add_match', isLoggedIn, function(req, _res, next) {
   });
 });
 
+router.get('/requestDeleteMatch', isLoggedIn, function(req, res){
+  var loggedUserId = req.user.id;
+  //fetch last match
+  db.Match.findAll({
+    order: '"createdAt" DESC',
+    limit: 1
+  }).then(function(data){
+    var match = data[0];
+    if (match.winner_id != loggedUserId && match.looser_id != loggedUserId) {
+      //logged user cant request deletion
+      res.sendStatus(401);
+      return;
+    }
+
+    var delReqs = JSON.parse(match.deleteRequests || "[]");
+    if (delReqs.indexOf(loggedUserId) == -1) {
+      delReqs.push(loggedUserId);
+    }
+
+    if (delReqs.length == 2) {
+      //both users requested of deletion -> delete
+      q.all([
+        modelHelpers.removeLastMatch()
+      ])
+        .then(function(){
+          res.redirect('/matches');
+        })
+        .catch(function(){
+          res.sendStatus(401);
+        })
+    } else {
+      match.updateAttributes({
+        deleteRequests: JSON.stringify(delReqs)
+      }).then(function(){
+        res.redirect('/matches');
+      }).catch(function(){
+        res.sendStatus(401);
+      });
+    }
+  }).catch(function(){
+    res.sendStatus(401);
+  })
+});
+
 function isLoggedIn(req, res, next) {
   if (req.isAuthenticated())
     return next();
