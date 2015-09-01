@@ -53,6 +53,10 @@ a {
   font-weight: bold;
 }
 
+.link-element {
+  cursor: pointer;
+}
+
 @media screen and (max-width: 600px) {
   .hide-mobile {
     display: none;

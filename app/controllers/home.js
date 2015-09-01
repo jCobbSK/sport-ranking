@@ -8,7 +8,8 @@ var express = require('express'),
   validator = require('validator'),
   modelHelpers = require('../lib/modelHelpers'),
   moment = require('moment'),
-  challongeIntegration = require('../lib/challonge-integration');
+  challongeIntegration = require('../lib/challonge-integration')(),
+  md5 = require('md5');
 
 var elo = new Elo();
 
@@ -275,23 +276,116 @@ router.post('/add_match', isLoggedIn, function(req, _res, next) {
 });
 
 router.get('/tournaments', isLoggedIn, function(req, res) {
-  res.render('index',{
-    tab: 'tournaments'
-  })
+  var loggedUserId = req.user.id;
+  q.all([
+    db.Tournament.findAll({
+      order: '"createdAt" DESC',
+      include: [
+        {model: db.User, as: 'creator'},
+        {model: db.User, as: 'winner'},
+        {model: db.Participant, as: 'participants'}
+      ],
+      where: {
+        cancelled: false
+      }
+    })
+  ])
+    .then(function(data){
+      //TODO filter tournaments
+      //  user's open ( creator == logged, no winner, no started)
+      //  open (no winner, no cancelled, no started)
+      //  in progress (no winner, no cancelled, started)
+      //  winners (has winner)
+      var tournaments = data[0] || [];
+      var usersTournaments = tournaments.filter(function(tournament){
+        return tournament.creator_id == loggedUserId && !tournament.winner_id;
+      });
+
+      var openTournaments = tournaments.filter(function(tournament){
+        return !tournament.winner_id && !tournament.isStarted;
+      }).map(function(tournament){
+        tournament['joined'] = tournament.participants.filter(function(participant){
+          return participant.id == loggedUserId;
+        }).length == 1;
+        return tournament;
+      });
+
+      var inProgress = tournaments.filter(function(tournament){
+        return !tournament.winner_id && tournament.isStarted;
+      });
+
+      var allFinished = tournaments.filter(function(tournament) {
+        return tournament.winner_id;
+      });
+
+      res.render('index', {
+        tab: 'tournaments',
+        usersTournaments: usersTournaments,
+        openTournaments: openTournaments,
+        inProgressTournaments: inProgress,
+        finishedTournaments: allFinished
+      })
+    })
+    .catch(function(err){
+      debugger;
+      res.sendStatus(401);
+    });
 });
 
 router.get('/tournaments/:id', isLoggedIn, function(req, res) {
   res.render('tournament', {
-
+    //TODO tournament page data
   });
 });
+
+router.get('/tournaments/:id/join/:isJoining', isLoggedIn, function(req, res){
+  //TODO add/remove participants
+  //TODO call challonge API accordingly
+  res.redirect('/tournaments/' + req.params.id);
+});
+
+router.get('/tournaments/:id/start/:isStarting', isLoggedIn, function(req, res){
+  //TODO need to check if logged user is creator of tournament
+  //TODO delete tournament || call challonge API to start tournament
+  res.redirect('/tournaments/'+req.params.id);
+})
 
 router.post('/add_tournament', isLoggedIn, function(req, res) {
   var name = req.body['tournament-name'],
     type = req.body['tournament-type'],
-    note = req.body['tournament-note'],
+    note = req.body['tournament-note'];
     startsAt = req.body['tournament-start'];
-  //TODO challongeIntegration.createTournament();
+
+  var url = md5(name);
+  console.log(name, url, type, startsAt);
+  challongeIntegration.createTournament(name, url, type, startsAt)
+    .then(function(data){
+      //data consists of challongeUrl, challongeId
+      var challongeUrl = data.tournament.full_challonge_url,
+        challongeId = data.tournament.id;
+      q.all([
+        db.Tournament.create({
+          creator_id: req.user.id,
+          name: name,
+          type: type,
+          note: note,
+          challonge_url: challongeUrl,
+          challonge_id: challongeId,
+          startsAt: startsAt
+        })
+      ])
+        .then(function(result){
+          res.render('index', {
+            tab: 'tournaments'
+          });
+        })
+        .catch(function(err){
+          res.sendStatus(401);
+        })
+    })
+    .catch(function(err){
+      res.sendStatus(401);
+    })
 })
 
 function isLoggedIn(req, res, next) {

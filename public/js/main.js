@@ -11,3 +11,9 @@ var setupTimers = function() {
     calculateTime();
   }, 5000);
 }
+
+var activateLinkElements = function() {
+  $('.link-element').on('click', function(){
+    window.location.href = $(this).data('link');
+  });
+}

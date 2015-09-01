@@ -60,13 +60,17 @@
 
         setupTimers();
 
+        activateLinkElements();
+
         $('.last-score-notif').click(function(){
             $('.last-score-notif').hide();
         });
 
         $('#tournament-start').datetimepicker({
-            defaultDate: moment()
-        });
+            format: 'YYYY-MM-DDTHH:mm:ssZ',
+            defaultDate: moment().toISOString()
+        })
+
     });
 
 

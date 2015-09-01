@@ -21,16 +21,18 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr>
-                      <td>#1</td>
-                      <td>12</td>
-                      <td>Hra sa o pivko</td>
-                      <td>1h 12min 32s</td>
-                      <td>
-                          <button class="btn btn-primary">START</button>
-                          <button class="btn btn-danger">CANCEL</button>
-                      </td>
-                  </tr>
+                  {{#each usersTournaments}}
+                    <tr class="link-element" data-link="/tournaments/{{id}}">
+                        <td>{{name}}</td>
+                        <td>{{participants.length}}</td>
+                        <td>{{note}}</td>
+                        <td class="timed-var" data-time="{{startsAt}}"></td>
+                        <td>
+                            <a class="btn-success btn" href="/tournaments/{{id}}/start/true">Start</a>
+                            <a class="btn btn-danger" href="/tournaments/{{id}}/start/false">Cancel</a>
+                        </td>
+                    </tr>
+                  {{/each}}
                 </tbody>
               </table>
         </div>
@@ -42,6 +44,7 @@
                 <thead>
                   <tr>
                       <th>Name</th>
+                      <th>Participants</th>
                       <th>Creator</th>
                       <th>Note</th>
                       <th>Time to start</th>
@@ -49,33 +52,22 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr>
-                      <td>#1</td>
-                      <td>Jakub Kanitra</td>
-                      <td>Hra sa o pivko</td>
-                      <td>1h 12min 32s</td>
-                      <td>
-                          <button class="btn btn-primary">JOIN</button>
-                      </td>
-                  </tr>
-                  <tr>
-                      <td>#1</td>
-                      <td>Jakub Kanitra</td>
-                      <td>Hra sa o pivko</td>
-                      <td>1h 12min 32s</td>
-                      <td>
-                          <button class="btn btn-primary">JOIN</button>
-                      </td>
-                  </tr>
-                  <tr>
-                      <td>#1</td>
-                      <td>Jakub Kanitra</td>
-                      <td>Hra sa o pivko</td>
-                      <td>1h 12min 32s</td>
-                      <td>
-                          <button class="btn btn-primary">JOIN</button>
-                      </td>
-                  </tr>
+                  {{#each openTournaments}}
+                    <tr class="link-element" data-link="/tournaments/{{id}}">
+                        <td>{{name}}</td>
+                        <td>{{participants.length}}</td>
+                        <td>{{creator.name}}</td>
+                        <td>{{note}}</td>
+                        <td class="timed-var" data-time="{{startsAt}}"></td>
+                        <td>
+                            {{#unless joined}}
+                              <a class="btn btn-primary" href="/tournaments/{{id}}/join/true">JOIN</a>
+                            {{else}}
+                              <a class="btn btn-danger" href="/tournaments/{{id}}/join/false">UN-JOIN</a>
+                            {{/unless}}
+                        </td>
+                    </tr>
+                  {{/each}}
                 </tbody>
             </table>
         </div>
@@ -83,13 +75,49 @@
     <div class="panel panel-default">
         <div class="panel-heading">In progress</div>
         <div class="panel-body">
-            Panel content
+            <table class="table table-hover">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Participants</th>
+                    <th>Note</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {{#each inProgressTournaments}}
+                    <tr class="link-element" data-link="/tournaments/{{id}}">
+                        <td>{{name}}</td>
+                        <td>{{participants.length}}</td>
+                        <td>{{note}}</td>
+                    </tr>
+                  {{/each}}
+                </tbody>
+            </table>
         </div>
     </div>
     <div class="panel panel-default">
         <div class="panel-heading">Winners</div>
         <div class="panel-body">
-            Panel content
+            <table class="table table-hover">
+                <thead>
+                  <tr>
+                      <th>Winner</th>
+                      <th>Name</th>
+                      <th>Participants</th>
+                      <th>Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {{#each finishedTournaments}}
+                    <tr class="link-element" data-link="/tournaments/{{id}}">
+                        <td><a href="/users/{{winner_id}}">{{winner.name}}</a></td>
+                        <td>{{name}}</td>
+                        <td>{{participants.length}}</td>
+                        <td class="timed-var" data-time="{{updatedAt}}"></td>
+                    </tr>
+                  {{/each}}
+                </tbody>
+            </table>
         </div>
     </div>
 </div>
