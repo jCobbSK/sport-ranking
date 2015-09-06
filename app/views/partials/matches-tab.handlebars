@@ -28,10 +28,13 @@
         </tbody>
     </table>
     <nav style="text-align: center;">
+        {{{pagination actualPage matchPages}}}
+        {{!--
         <ul class="pagination">
           {{#for matchPages}}
               <li {{#ifCond this '==' ../actualPage}} class="active" {{/ifCond}}><a href="/matches?page={{this}}">{{inc this}}</a></li>
           {{/for}}
         </ul>
+        --}}
     </nav>
 </div>
