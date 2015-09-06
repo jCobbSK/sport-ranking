@@ -81,7 +81,7 @@ router.get('/users/:id', isLoggedIn, function(req, _res){
       users: users.users,
       pointHistory: JSON.stringify(res[2].map(function(obj){
         return [
-          moment(obj.originCreatedAt).unix() * 1000 + moment(obj.originCreatedAt).milliseconds(),
+          moment(obj.originCreatedAt).unix()*1000,
           obj.points
         ]
       }))

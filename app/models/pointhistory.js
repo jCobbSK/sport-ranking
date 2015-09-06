@@ -6,7 +6,7 @@ module.exports = function(sequelize, DataTypes) {
     points: DataTypes.INTEGER,
     originCreatedAt: {
       type: DataTypes.DATE,
-      defaultValue: moment().toISOString()
+      defaultValue: DataTypes.NOW
     }
   }, {
     classMethods: {
