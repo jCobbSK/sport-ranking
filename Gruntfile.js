@@ -27,6 +27,16 @@ module.exports = function (grunt) {
         }
       }
     },
+    wiredep: {
+      task: {
+        src: [
+          'app/views/**/*.handlebars'
+        ],
+        options: {
+          ignorePath: '../../../public/'
+        }
+      }
+    },
     watch: {
       options: {
         nospawn: true,
@@ -58,6 +68,13 @@ module.exports = function (grunt) {
       }
     }
   });
+
+  grunt.registerTask('default', [
+    'wiredep',
+    'sass',
+    'develop',
+    'watch'
+  ]);
 
   grunt.config.requires('watch.js.files');
   files = grunt.config('watch.js.files');
@@ -139,9 +156,5 @@ module.exports = function (grunt) {
     })
   });
 
-  grunt.registerTask('default', [
-    'sass',
-    'develop',
-    'watch'
-  ]);
+
 };
