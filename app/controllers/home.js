@@ -203,8 +203,8 @@ router.post('/add_match', isLoggedIn, function(req, _res, next) {
 
   //check params
   q.all([
-    db.User.find(req.user.id),
-    db.User.find(req.body.oponent)
+    db.User.findById(req.user.id),
+    db.User.findById(req.body.oponent)
   ]).then(function(res){
     if (!res[0] || !res[1]) {
       _res.redirect('/?error='+encodeURIComponent('Not logged in or bad oponent'));
@@ -291,7 +291,6 @@ router.get('/tournaments', isLoggedIn, function(req, res) {
     })
   ])
     .then(function(data){
-      //TODO filter tournaments
       //  user's open ( creator == logged, no winner, no started)
       //  open (no winner, no cancelled, no started)
       //  in progress (no winner, no cancelled, started)
@@ -301,11 +300,12 @@ router.get('/tournaments', isLoggedIn, function(req, res) {
         return tournament.creator_id == loggedUserId && !tournament.winner_id;
       });
 
+
       var openTournaments = tournaments.filter(function(tournament){
         return !tournament.winner_id && !tournament.isStarted;
       }).map(function(tournament){
         tournament['joined'] = tournament.participants.filter(function(participant){
-          return participant.id == loggedUserId;
+          return participant.user_id == loggedUserId;
         }).length == 1;
         return tournament;
       });
@@ -327,7 +327,6 @@ router.get('/tournaments', isLoggedIn, function(req, res) {
       })
     })
     .catch(function(err){
-      debugger;
       res.sendStatus(401);
     });
 });
@@ -339,9 +338,18 @@ router.get('/tournaments/:id', isLoggedIn, function(req, res) {
 });
 
 router.get('/tournaments/:id/join/:isJoining', isLoggedIn, function(req, res){
-  //TODO add/remove participants
-  //TODO call challonge API accordingly
-  res.redirect('/tournaments/' + req.params.id);
+  var promise;
+  if (req.params.isJoining == 'true') {
+    promise = challongeIntegration.addParticipant(req.user, req.params.id);
+  } else {
+    promise = challongeIntegration.removeParticipant(req.user, req.params.id);
+  }
+  promise.then(function(){
+    res.redirect('/tournaments');
+  }).catch(function(err){
+    console.error(err);
+    res.sendStatus(401);
+  })
 });
 
 router.get('/tournaments/:id/start/:isStarting', isLoggedIn, function(req, res){
@@ -375,9 +383,7 @@ router.post('/add_tournament', isLoggedIn, function(req, res) {
         })
       ])
         .then(function(result){
-          res.render('index', {
-            tab: 'tournaments'
-          });
+          res.redirect('/tournaments');
         })
         .catch(function(err){
           res.sendStatus(401);

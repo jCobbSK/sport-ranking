@@ -27,7 +27,7 @@
     "q": "^1.4.1",
     "request": "^2.61.0",
     "restler": "^3.3.0",
-    "sequelize": "~2.1.0",
+    "sequelize": "~3.9.0",
     "serve-favicon": "~2.2.0",
     "validator": "^4.0.2"
   },
