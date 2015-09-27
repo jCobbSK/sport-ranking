@@ -44,7 +44,7 @@
 <!-- notification small modal -->
 {{#ifCond tab '==' 'users'}}
   {{#if showResult}}
-      <div class="last-score-notif alert {{#if hasWon}}alert-success{{/if}} {{#unless hasWon}}alert-danger{{/unless}}">
+      <div class="top-right-notification alert {{#if hasWon}}alert-success{{/if}} {{#unless hasWon}}alert-danger{{/unless}}">
           <h2>{{#if hasWon}}+{{/if}}{{submitPoints}} points</h2>
           <h3>Rank: {{actualRank}}</h3>
 
@@ -55,6 +55,19 @@
   {{/if}}
 {{/ifCond}}
 
+<!-- error notification tab -->
+{{#if error}}
+  <div class="top-right-notification alert alert-danger">
+    <h2>Error</h2>
+    <div>
+      {{error}}
+    </div>
+    <div class="close-icon">
+      <i class="fa fa-times"></i>
+    </div>
+  </div>
+{{/if}}
+
 <script>
     $(document).ready(function(){
 
@@ -62,8 +75,8 @@
 
         activateLinkElements();
 
-        $('.last-score-notif').click(function(){
-            $('.last-score-notif').hide();
+        $('.top-right-notification').click(function(){
+            $(this).hide();
         });
 
         $('#tournament-start').datetimepicker({

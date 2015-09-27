@@ -58,19 +58,43 @@ module.exports = function() {
     return deffered.promise;
   }
 
+  /**
+   * Check if user is owner of tournament and therefore can modify it (start | delete).
+   * @param user
+   * @param tournamentId
+   * @returns {q.promise}
+   */
+  function isOwnerOfTournament(user, tournamentId) {
+    var defer = q.defer();
+
+    db.Tournament.findById(tournamentId)
+      .then(function(tournament){
+        if (tournament && tournament.creator_id == user.id)
+          defer.resolve(tournament);
+        else
+          defer.reject('Logged user is not owner of tournament or tournament doesn\'t exist');
+      })
+      .catch(function(err){
+        defer.reject(err);
+      });
+
+    return defer.promise;
+  }
+
   return {
     /**
-     * Create tournament in challonge system.
+     * Create tournament in challonge system and create instance in application database.
+     * @param {db.User} user
      * @param {string} name
      * @param {string} url
      * @param {string} type
      * @param {datetime} startAt
-     * @returns q.promise with result {
-     *  challongeId: [integer],
-     *  challongeUrl: [string]
-     * }
+     * @param {string} note
+     * @returns q.promise
      */
-    createTournament: function(name, url, type, startAt) {
+    createTournament: function(user, name, url, type, startAt, note) {
+
+      var defer = q.defer();
 
       var content = {
         tournament: {
@@ -81,7 +105,31 @@ module.exports = function() {
         }
       };
 
-      return sendContent('POST', 'tournaments', content);
+      sendContent('POST', 'tournaments', content)
+        .then(function(data){
+          //data consists of challongeUrl, challongeId
+          var challongeUrl = data.tournament.full_challonge_url,
+              challongeId = data.tournament.id;
+          q.all([
+            db.Tournament.create({
+              creator_id: user.id,
+              name: name,
+              type: type,
+              note: note,
+              challonge_url: challongeUrl,
+              challonge_id: challongeId,
+              startsAt: startsAt
+            })
+          ])
+            .then(function(result){
+              defer.resolve(result);
+            })
+        })
+        .catch(function(err){
+          defer.reject({challongeError:err.errors.join(' ; ')});
+        });
+
+      return defer.promise;
     },
 
     /**
@@ -139,7 +187,7 @@ module.exports = function() {
             })
           })
           .catch(function(err){
-            deferResult.reject(err);
+            deferResult.reject({challongeError:err.errors.join(' ; ')});
           });
       }).catch(function(err){
         deferResult.reject(err);
@@ -180,15 +228,14 @@ module.exports = function() {
         //send challonge api for destroy
         //remove participant
         var url = 'tournaments/' + participant.tournament.challonge_id + '/participants/' + participant.challonge_id;
-        q.all([
-          sendContent('DELETE', url, {}),
-          participant.destroy()
-        ])
-          .then(function(data){
-            deferResult.resolve(data);
-          })
-          .catch(function(err){
-            deferResult.reject(err);
+          sendContent('DELETE', url, {}).then(function(){
+            participant.destroy().then(function(){
+              deferResult.resolve();
+            }).catch(function(err){
+              deferResult.reject(err);
+            })
+          }).catch(function(err){
+            deferResult.reject({challongeError:err.errors.join(' ; ')});
           })
       })
         .catch(function(err){
@@ -200,25 +247,77 @@ module.exports = function() {
 
     /**
      * Starts tournament. (can't join after)
-     * @param {integer} userId
+     * @param {db.User} user
      * @param {integer} tournamentId
      */
-    startTournament: function(userId, tournamentId) {
+    startTournament: function(user, tournamentId) {
       //check if user is owner of tournament
+      var deferResult = q.defer();
 
       //start tournament
+      isOwnerOfTournament(user, tournamentId)
+        .then(function(tournament){
+          //start tournament
+            sendContent('POST', 'tournaments/' + tournament.challonge_id + '/start', {})
+              .then(function(){
+                tournament.updateAttributes({
+                  isStarted: true
+                }).then(function(){
+                  defer.resolve();
+                })
+                .catch(function(err){
+                  defer.reject(err);
+                })
+              })
+              .catch(function(){
+                deferResult.reject({challongeError:err.errors.join(' ; ')});
+              })
+        })
+        .catch(function(err){
+          deferResult.reject(err);
+        });
 
+      return deferResult.promise;
     },
 
     /**
      * Deletes tournament.
-     * @param userId
-     * @param tournamentId
+     * @param {db.User} user
+     * @param {integer} tournamentId
+     * @returns {q.promise}
      */
-    deleteTournament: function(userId, tournamentId) {
+    deleteTournament: function(user, tournamentId) {
+      var defer = q.defer();
       //check if user is owner of tournament
+      isOwnerOfTournament(user, tournamentId)
+        .then(function(tournament){
+            sendContent('DELETE', 'tournaments/'+tournament.challonge_id, {})
+              .then(function(){
+                tournament.destroy().then(function(){
+                  defer.resolve();
+                })
+                  .catch(function(err){
+                    defer.reject(err);
+                  })
+              })
+              .catch(function(err){
+                defer.reject({challongeError:err.errors.join(' ; ')});
+              })
+        })
+        .catch(function(err){
+          return defer.reject(err);
+        });
 
-      //delete tournament
+      return defer.promise;
+    },
+
+    /**
+     * Returns all matches for specific tournament. Optionally filtered only for specific user.
+     * @param {integer} [required] tournamentId
+     * @param {db.User} [optional] user
+     * @returns {q.promise}
+     */
+    getMatchesForTournament: function(tournamentId, user) {
 
     },
 

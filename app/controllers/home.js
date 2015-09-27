@@ -133,6 +133,7 @@ router.get('/', isLoggedIn, function (req, _res, next) {
       submitPoints: req.query.submitPoints,
       hasWon: req.query.hasWon == 'true',
       actualRank: result.loggedUserRank,
+      error: req.query.error
     });
   }).catch(function(err) {
     console.error(err);
@@ -323,7 +324,8 @@ router.get('/tournaments', isLoggedIn, function(req, res) {
         usersTournaments: usersTournaments,
         openTournaments: openTournaments,
         inProgressTournaments: inProgress,
-        finishedTournaments: allFinished
+        finishedTournaments: allFinished,
+        error: req.query.error
       })
     })
     .catch(function(err){
@@ -347,16 +349,34 @@ router.get('/tournaments/:id/join/:isJoining', isLoggedIn, function(req, res){
   promise.then(function(){
     res.redirect('/tournaments');
   }).catch(function(err){
-    console.error(err);
-    res.sendStatus(401);
+    if (err.challongeError)
+      res.redirect('/tournaments/?error='+err.challongeError);
+    else
+      res.sendStatus(401);
   })
 });
 
 router.get('/tournaments/:id/start/:isStarting', isLoggedIn, function(req, res){
-  //TODO need to check if logged user is creator of tournament
-  //TODO delete tournament || call challonge API to start tournament
-  res.redirect('/tournaments/'+req.params.id);
-})
+  var tournamentId = req.params.id,
+      isStarting = req.params.isStarting == 'true',
+      promise;
+
+  if (isStarting)
+    promise = challongeIntegration.startTournament(req.user, tournamentId);
+  else
+    promise = challongeIntegration.deleteTournament(req.user, tournamentId);
+
+  promise
+    .then(function(){
+      res.redirect('/tournaments')
+    })
+    .catch(function(err){
+      if (err.challongeError)
+        res.redirect('/tournaments/?error='+err.challongeError);
+      else
+        res.sendStatus(401);
+    })
+});
 
 router.post('/add_tournament', isLoggedIn, function(req, res) {
   var name = req.body['tournament-name'],
@@ -366,32 +386,17 @@ router.post('/add_tournament', isLoggedIn, function(req, res) {
 
   var url = md5(name);
   console.log(name, url, type, startsAt);
-  challongeIntegration.createTournament(name, url, type, startsAt)
-    .then(function(data){
-      //data consists of challongeUrl, challongeId
-      var challongeUrl = data.tournament.full_challonge_url,
-        challongeId = data.tournament.id;
-      q.all([
-        db.Tournament.create({
-          creator_id: req.user.id,
-          name: name,
-          type: type,
-          note: note,
-          challonge_url: challongeUrl,
-          challonge_id: challongeId,
-          startsAt: startsAt
-        })
-      ])
-        .then(function(result){
-          res.redirect('/tournaments');
-        })
-        .catch(function(err){
+  challongeIntegration.createTournament(req.user, name, url, type, startsAt, note)
+      .then(function(result){
+        res.redirect('/tournaments');
+      })
+      .catch(function(err){
+        console.error(err.challongeError);
+        if (err.challongeError)
+          res.redirect('/tournaments/?error='+err.challongeError);
+        else
           res.sendStatus(401);
-        })
-    })
-    .catch(function(err){
-      res.sendStatus(401);
-    })
+      })
 })
 
 function isLoggedIn(req, res, next) {
