@@ -95,43 +95,20 @@ router.get('/', isLoggedIn, function (req, _res, next) {
 
   q.all([
     //users
-    db.User.findAll({
-      order: 'points DESC',
-      include: [
-        {model: db.Match, as: 'wins'},
-        {model: db.Match, as: 'losses'}
-      ]
-    })
+    db.sequelize.query(
+      'SELECT *, (SELECT COUNT(*) FROM "Matches" WHERE "winner_id" = "Users"."id") AS "wins", (SELECT COUNT(*) FROM "Matches" WHERE "looser_id" = "Users"."id") AS "losts" FROM "Users" ORDER BY "points" DESC;'
+    )
   ]).then(function(res) {
-
-    //transform arrays
-    var loggedUserId = req.user.id;
-    var result = modelHelpers.usersTransform(loggedUserId, res[0]);
-    var loggedUserPoints = req.user.points;
-
-    //calculate possible point addition if won
-    result.users = result.users.map(function(user){
-      user['possiblePointAddition'] = elo.newRatingIfWon(loggedUserPoints, user.points) - loggedUserPoints;
-      user['possiblePointLoose'] = elo.newRatingIfLost(loggedUserPoints, user.points) - loggedUserPoints;
-      return user;
-    });
-
-    var notRankedUsers = result.users.filter(function(user){
-      return user.wins == 0 && user.losts == 0;
-    });
-
-    var users = result.users.filter(function(user){
-      return user.wins != 0 || user.losts != 0;
-    });
+    var result = modelHelpers.usersTransform(req.user, res[0][0]);
 
     _res.render('index', {
       tab: 'users',
-      users: users,
-      notRankedUsers: notRankedUsers,
+      users: result.rankedUsers,
+      notRankedUsers: result.notRankedUsers,
       showResult: req.query.showResult == 'true',
       submitPoints: req.query.submitPoints,
       hasWon: req.query.hasWon == 'true',
-      actualRank: result.loggedUserRank,
+      actualRank: result.loggedUserRank
     });
   }).catch(function(err) {
     console.error(err);
