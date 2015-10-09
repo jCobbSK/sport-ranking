@@ -5,7 +5,6 @@ var express = require('express'),
 
 var app = express();
 
-require('./config/auth')(app);
 require('./config/express')(app, config);
 
 db.sequelize
