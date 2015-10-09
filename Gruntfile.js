@@ -3,7 +3,9 @@
 var request = require('request'),
   db = require('./app/models'),
   q = require('q'),
-  modelHelpers = require('./app/lib/modelHelpers');
+  modelHelpers = require('./app/lib/modelHelpers'),
+    path = require('path'),
+    rootPath = path.resolve(__dirname);
 
 module.exports = function (grunt) {
   // show elapsed time at the end
@@ -66,6 +68,11 @@ module.exports = function (grunt) {
         ],
         options: { livereload: reloadPort }
       }
+    },
+    shell: {
+      target: {
+        command: 'NODE_ENV=production forever ' + rootPath + '/app.js restart'
+      }
     }
   });
 
@@ -74,6 +81,16 @@ module.exports = function (grunt) {
     'sass',
     'develop',
     'watch'
+  ]);
+
+  grunt.registerTask('bundle-scripts', [
+    'wiredep',
+    'sass'
+  ]);
+
+  grunt.registerTask('deploy', [
+    'bundle-scripts',
+    'shell'
   ]);
 
   grunt.config.requires('watch.js.files');
