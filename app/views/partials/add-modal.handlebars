@@ -1,47 +1,59 @@
 <div class="modal fade" id="add-match-modal">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form action="/add_match" method="POST">
+            <form action="{{route}}" method="POST">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                     <h4 class="modal-title">New match</h4>
                 </div>
                 <div class="modal-body">
                     <!-- add match form -->
-                    <div class="form-group">
+                    {{#if fixed}}
+                      <div class="row">
+                        <div class="col-sm-6">
+                          {{first-prompt}}
+                        </div>
+                        <div class="col-sm-6">
+                          {{second-prompt}}
+                        </div>
+                      </div>
+                      <input type="hidden" name="match-id" value="{{match-id}}">
+                    {{else}}
+                      <div class="form-group">
                         <label for="oponent">Oponent</label>
                         <select class="form-control selectpicker" data-live-search="true" name="oponent">
                           {{#each users}}
                             {{#unless self}}
-                                <option data-tokens="{{stripAccents name}}" value="{{id}}">{{name}}</option>
+                              <option data-tokens="{{stripAccents name}}" value="{{id}}">{{name}}</option>
                             {{/unless}}
                           {{/each}}
                           {{#each notRankedUsers}}
                             {{#unless self}}
-                                <option data-tokens="{{stripAccents name}}" value="{{id}}">{{name}}</option>
+                              <option data-tokens="{{stripAccents name}}" value="{{id}}">{{name}}</option>
                             {{/unless}}
                           {{/each}}
                         </select>
-                    </div>
+                      </div>
+                    {{/if}}
                     <div class="form-group">
                         <label for="first-set">1st set</label>
                         <div>
-                            <input type="number" min="0" step="1" name="first-submitter" class="form-control new-match-input" placeholder="Your 1st set result" required>
-                            <input type="number" min="0" step="1" name="first-oponent" class="form-control new-match-input" placeholder="Oponent's 1st set result" required>
+                            <input type="number" min="0" step="1" name="first-submitter" class="form-control new-match-input" placeholder="{{first-prompt}} 1st set result" required>
+                            <input type="number" min="0" step="1" name="first-oponent" class="form-control new-match-input" placeholder="{{second-prompt}} 1st set result" required>
                         </div>
                     </div>
                     <div class="form-group" style="clear:both;">
                         <label for="first-set">2nd set</label>
                         <div>
-                            <input type="number" min="0" step="1" name="second-submitter" class="form-control new-match-input" placeholder="Your 2nd set result" required>
-                            <input type="number" min="0" step="1" name="second-oponent" class="form-control new-match-input" placeholder="Oponent's 2nd set result" required>
+                            <input type="number" min="0" step="1" name="second-submitter" class="form-control new-match-input" placeholder="{{first-prompt}} 2nd set result" required>
+                            <input type="number" min="0" step="1" name="second-oponent" class="form-control new-match-input" placeholder="{{second-prompt}} 2nd set result" required>
                         </div>
                     </div>
                     <div class="form-group">
                         <label for="first-set">3rd set (if needed)</label>
                         <div>
-                            <input type="number" min="0" step="1" name="third-submitter" class="form-control new-match-input" placeholder="Your 3rd set result">
-                            <input type="number" min="0" step="1" name="third-oponent" class="form-control new-match-input" placeholder="Oponent's 3rd set result">
+                            <input type="number" min="0" step="1" name="third-submitter" class="form-control new-match-input" placeholder="{{first-prompt}} 3rd set result">
+                            <input type="number" min="0" step="1" name="third-oponent" class="form-control new-match-input" placeholder="{{second-prompt}} 3rd set result">
                         </div>
                     </div>
                 </div>

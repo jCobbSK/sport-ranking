@@ -334,9 +334,29 @@ router.get('/tournaments', isLoggedIn, function(req, res) {
 });
 
 router.get('/tournaments/:id', isLoggedIn, function(req, res) {
-  res.render('tournament', {
-    //TODO tournament page data
-  });
+  var tournamentId = req.params.id;
+
+  db.Tournament.findById(tournamentId, {
+    include: [
+      {model: db.User, as: 'creator'},
+      {model: db.User, as: 'winner'}
+    ]
+  })
+    .then(function(tournament){
+      challongeIntegration.getMatchesForTournament(tournamentId, req.user)
+        .then(function(matches){
+          res.render('tournament', {
+            tournament: tournament,
+            matches: matches
+          });
+        })
+        .catch(function(err){
+          res.sendStatus(401);
+        })
+    })
+    .catch(function(err){
+      res.sendStatus(400);
+    })
 });
 
 router.get('/tournaments/:id/join/:isJoining', isLoggedIn, function(req, res){

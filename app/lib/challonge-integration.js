@@ -263,10 +263,10 @@ module.exports = function() {
                 tournament.updateAttributes({
                   isStarted: true
                 }).then(function(){
-                  defer.resolve();
+                  deferResult.resolve();
                 })
                 .catch(function(err){
-                  defer.reject(err);
+                    deferResult.reject(err);
                 })
               })
               .catch(function(){
@@ -303,6 +303,7 @@ module.exports = function() {
               .catch(function(err){
                 defer.reject({challongeError:err.errors.join(' ; ')});
               })
+
         })
         .catch(function(err){
           return defer.reject(err);
@@ -312,13 +313,48 @@ module.exports = function() {
     },
 
     /**
-     * Returns all matches for specific tournament. Optionally filtered only for specific user.
+     * Returns all matches for specific tournament if user is creator of tournament, if user is participant in tournament,
+     * it returns only he's open matches, otherwise returns empty array;
      * @param {integer} [required] tournamentId
      * @param {db.User} [optional] user
      * @returns {q.promise}
      */
     getMatchesForTournament: function(tournamentId, user) {
+      var defer = q.defer();
+      db.Tournament.findById(tournamentId,{
+        include: [
+          {model: db.Participant, as: 'participants'}
+        ]
+      }).then(function(tournament){
+        var challongeResp;
+        if (tournament.creator_id == user.id) {
+          debugger;
+          challongeResp = sendContent('GET', 'tournaments/' + tournament.challonge_id + '/matches', {state: 'open'});
+        } else {
+          var participant = tournament.participants.filter(function(p){
+            return p.user_id == user.id;
+          });
+          if (participant) {
+            //retrieve only matches for him only
+            challongeResp = sendContent('GET', 'tournaments/' + tournament.challonge_id + '/matches', {state: 'open', participant_id: participant.challonge_id});
+          } else {
+            var help = q.defer();
+            help.resolve([]);
+            challongeResp = help.promise;
+          }
+        }
 
+        challongeResp.then(function(matches){
+          defer.resolve(matches);
+        }).catch(function(err){
+          defer.reject(err);
+        })
+
+      }).catch(function(err){
+        defer.reject(err);
+      })
+
+      return defer.promise;
     },
 
     /**
