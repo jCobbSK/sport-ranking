@@ -7,7 +7,11 @@ module.exports = function(sequelize, DataTypes) {
     sport_id: DataTypes.INTEGER,
     score: DataTypes.STRING,
     winner_points: DataTypes.INTEGER,
-    looser_points: DataTypes.INTEGER
+    looser_points: DataTypes.INTEGER,
+    deleteRequests: {
+      type: DataTypes.STRING,
+      defaultValue: '[]'
+    }
   }, {
     classMethods: {
       associate: function(models) {

@@ -2,7 +2,10 @@
 
 var request = require('request'),
   db = require('./app/models'),
-  q = require('q');
+  q = require('q'),
+  modelHelpers = require('./app/lib/modelHelpers'),
+    path = require('path'),
+    rootPath = path.resolve(__dirname);
 
 module.exports = function (grunt) {
   // show elapsed time at the end
@@ -23,6 +26,16 @@ module.exports = function (grunt) {
       dist: {
         files: {
           'public/css/style.css': 'public/css/style.scss'
+        }
+      }
+    },
+    wiredep: {
+      task: {
+        src: [
+          'app/views/**/*.handlebars'
+        ],
+        options: {
+          ignorePath: '../../../public/'
         }
       }
     },
@@ -55,8 +68,30 @@ module.exports = function (grunt) {
         ],
         options: { livereload: reloadPort }
       }
+    },
+    shell: {
+      target: {
+        command: 'NODE_ENV=production forever ' + rootPath + '/app.js restart'
+      }
     }
   });
+
+  grunt.registerTask('default', [
+    'wiredep',
+    'sass',
+    'develop',
+    'watch'
+  ]);
+
+  grunt.registerTask('bundle-scripts', [
+    'wiredep',
+    'sass'
+  ]);
+
+  grunt.registerTask('deploy', [
+    'bundle-scripts',
+    'shell'
+  ]);
 
   grunt.config.requires('watch.js.files');
   files = grunt.config('watch.js.files');
@@ -125,9 +160,18 @@ module.exports = function (grunt) {
     })
   });
 
-  grunt.registerTask('default', [
-    'sass',
-    'develop',
-    'watch'
-  ]);
+  grunt.registerTask('remove-last-match', 'remove last match and update user points and history', function(){
+    var done = this.async();
+    q.all([
+      modelHelpers.removeLastMatch()
+    ]).then(function(){
+      console.log('Deleted.');
+      done();
+    }).catch(function(err){
+      console.error(err);
+      done();
+    })
+  });
+
+
 };

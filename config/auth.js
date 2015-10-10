@@ -8,13 +8,11 @@ var passport = require('passport'),
 module.exports = function(app) {
   var actualFcbConf = (process.env.NODE_ENV == 'production') ? facebookSettings['production'] : facebookSettings['development'];
   passport.serializeUser(function(user, done) {
-    console.log('serializing', user.id);
     done(null, user.id);
   });
 
   passport.deserializeUser(function(id, done) {
     db.User.find({where:{id:id}}).then(function(user){
-      console.log('deserializing', user);
       done(null, user);
     });
   });

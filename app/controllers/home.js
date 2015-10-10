@@ -74,7 +74,7 @@ router.get('/users/:id', isLoggedIn, function(req, _res){
     var actualUser = users.users.filter(function(u){
       return u.id == usersId;
     })[0];
-    actualUser.rank = users.loggedUserRank;
+    actualUser.rank = (actualUser.wins > 0 || actualUser.losts > 0) ? users.loggedUserRank : '';
 
     _res.render('user-profile',{
       user: actualUser,
@@ -97,38 +97,16 @@ router.get('/', isLoggedIn, function (req, _res, next) {
 
   q.all([
     //users
-    db.User.findAll({
-      order: 'points DESC',
-      include: [
-        {model: db.Match, as: 'wins'},
-        {model: db.Match, as: 'losses'}
-      ]
-    })
+    db.sequelize.query(
+      'SELECT *, (SELECT COUNT(*) FROM "Matches" WHERE "winner_id" = "Users"."id") AS "wins", (SELECT COUNT(*) FROM "Matches" WHERE "looser_id" = "Users"."id") AS "losts" FROM "Users" ORDER BY "points" DESC;'
+    )
   ]).then(function(res) {
-
-    //transform arrays
-    var loggedUserId = req.user.id;
-    var result = modelHelpers.usersTransform(loggedUserId, res[0]);
-    var loggedUserPoints = req.user.points;
-
-    //calculate possible point addition if won
-    result.users = result.users.map(function(user){
-      user['possiblePointAddition'] = elo.newRatingIfWon(loggedUserPoints, user.points) - loggedUserPoints;
-      return user;
-    });
-
-    var notRankedUsers = result.users.filter(function(user){
-      return user.wins == 0 && user.losts == 0;
-    });
-
-    var users = result.users.filter(function(user){
-      return user.wins != 0 || user.losts != 0;
-    });
+    var result = modelHelpers.usersTransform(req.user, res[0][0]);
 
     _res.render('index', {
       tab: 'users',
-      users: users,
-      notRankedUsers: notRankedUsers,
+      users: result.rankedUsers,
+      notRankedUsers: result.notRankedUsers,
       showResult: req.query.showResult == 'true',
       submitPoints: req.query.submitPoints,
       hasWon: req.query.hasWon == 'true',
@@ -418,6 +396,50 @@ router.post('/add_tournament', isLoggedIn, function(req, res) {
           res.sendStatus(401);
       })
 })
+
+router.get('/requestDeleteMatch', isLoggedIn, function(req, res){
+  var loggedUserId = req.user.id;
+  //fetch last match
+  db.Match.findAll({
+    order: '"createdAt" DESC',
+    limit: 1
+  }).then(function(data){
+    var match = data[0];
+    if (match.winner_id != loggedUserId && match.looser_id != loggedUserId) {
+      //logged user cant request deletion
+      res.sendStatus(401);
+      return;
+    }
+
+    var delReqs = JSON.parse(match.deleteRequests || "[]");
+    if (delReqs.indexOf(loggedUserId) == -1) {
+      delReqs.push(loggedUserId);
+    }
+
+    if (delReqs.length == 2) {
+      //both users requested of deletion -> delete
+      q.all([
+        modelHelpers.removeLastMatch()
+      ])
+        .then(function(){
+          res.redirect('/matches');
+        })
+        .catch(function(){
+          res.sendStatus(401);
+        })
+    } else {
+      match.updateAttributes({
+        deleteRequests: JSON.stringify(delReqs)
+      }).then(function(){
+        res.redirect('/matches');
+      }).catch(function(){
+        res.sendStatus(401);
+      });
+    }
+  }).catch(function(){
+    res.sendStatus(401);
+  })
+});
 
 function isLoggedIn(req, res, next) {
   if (req.isAuthenticated())

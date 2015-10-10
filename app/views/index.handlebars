@@ -69,7 +69,7 @@
 {{/if}}
 
 <script>
-    $(document).ready(function(){
+    window.onload = function(){
 
         setupTimers();
 
@@ -84,7 +84,7 @@
             defaultDate: moment().toISOString()
         })
 
-    });
+    };
 
 
 </script>

@@ -14,5 +14,40 @@
     "fontawesome": "~4.4.0",
     "highcharts": "~4.1.8",
     "moment": "~2.10.6"
+  },
+
+  "overrides": {
+    "bootstrap": {
+      "main": [
+        "dist/js/bootstrap.min.js",
+        "dist/css/bootstrap.min.css"
+      ]
+    },
+    "bootstrap-select": {
+      "main": [
+        "dist/js/bootstrap-select.min.js",
+        "dist/css/bootstrap-select.css"
+      ]
+    },
+    "challonge-jquery-plugin": {
+      "main": [
+        "jquery.challonge.js"
+      ]
+    },
+    "eonasdan-bootstrap-datetimepicker": {
+      "main": [
+        "build/css/bootstrap-datetimepicker.min.css",
+        "build/js/bootstrap-datetimepicker.min.js"
+      ]
+    },
+    "fontawesome": {
+      "main": "css/font-awesome.min.css"
+    },
+    "highcharts": {
+      "main": "highcharts.js"
+    },
+    "moment": {
+      "main": "min/moment.min.js"
+    }
   }
 }

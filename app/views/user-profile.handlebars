@@ -12,7 +12,13 @@
                     <div>
                         <!-- stats here -->
                         <h3 style="font-weight: bold;">{{user.name}}</h3>
-                        <h4>Rank: {{user.rank}} ({{user.points}}points)</h4>
+                        <h4>
+                          {{#if user.rank}}
+                            Rank: {{user.rank}} ({{user.points}}points)
+                          {{else}}
+                            Not ranked yet
+                          {{/if}}
+                        </h4>
                         <h4>Wins: {{user.wins}}</h4>
                         <h4>Losts: {{user.losts}}</h4>
                     </div>
@@ -85,7 +91,7 @@
                                 <td {{#if submitterIsWinner}}class="bold-text"{{/if}}><a href="/users/{{submitter.id}}">{{submitter.name}}</a> ({{submitter.points}})</td>
                                 <td>{{result}}</td>
                                 <td {{#unless submitterIsWinner}}class="bold-text"{{/unless}}><a href="/users/{{other.id}}">{{other.name}}</a> ({{other.points}})</td>
-                                <td class="timed-var" data-time="{{createdAt}}">{{createdAt}}</td>
+                                <td class="timed-var" data-time="{{createdAt}}" alt="{{createdAt}}" title="{{createdAt}}">{{createdAt}}</td>
                             </tr>
                         {{/each}}
                         </tbody>
