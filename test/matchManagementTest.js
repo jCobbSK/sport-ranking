@@ -2,6 +2,36 @@ var assert = require("assert"),
   mm = require('../app/lib/matchManagement');
 
 describe('Match Management', function() {
+
+  describe('#validateScoreArrays', function() {
+
+    it('should trim trailing empty elements', function() {
+      var trim = [['11', '11', ''],[0, '0', '', '']];
+
+      var res = mm.validateScoreArrays(trim[0], trim[1]);
+      assert(res[0].toString() == [11, 11].toString());
+      assert(res[1].toString() == [0, 0].toString());
+    })
+
+    it('should throw error when logic errors', function() {
+      var incorrect = [[0, null, 1], [null, 1, 1]];
+
+      assert.throws(
+        function(){
+          mm.validateScoreArrays(incorrect[0], incorrect[1]);
+        },
+        Error
+      );
+    })
+
+    it('should return 2 correct arrays of integers if everything works', function() {
+      var scores = [['11', '2', '14'], ['8', '11', '12']];
+      var res = mm.validateScoreArrays(scores[0], scores[1]);
+      assert(res[0].toString() == [11,2,14].toString());
+      assert(res[1].toString() == [8,11,12].toString());
+    })
+  })
+
   describe('#matchResult()', function () {
     it('should return false when the submit loose 1:2', function () {
       assert.equal(false, mm.matchResult(['11','6','6'],['6','11','11']));
@@ -15,6 +45,49 @@ describe('Match Management', function() {
     it('should return true when the submit loose 2:1', function () {
       assert.equal(true, mm.matchResult([11,8,11],[6,11,6]));
     });
+  })
+
+  describe('#createMatch', function() {
+    it('should correctly return id of winner and return correct default formatted score', function() {
+      var createdInfo = mm.createMatch(
+        {
+          id: 1,
+          points: 0,
+          matchScore: ['11', '2', '11']
+        },
+        {
+          id: 2,
+          points: 0,
+          matchScore: ['8', '11', '2']
+        }
+      );
+
+      assert(createdInfo.winnerId == 1);
+      assert(createdInfo.formattedScore == '11:8 2:11 11:2 ');
+    })
+
+    it('should correctly used formatted function', function() {
+      var createdInfo = mm.createMatch(
+        {
+          id: 1,
+          points: 0,
+          matchScore: ['11', '2', '11']
+        },
+        {
+          id: 2,
+          points: 0,
+          matchScore: ['8', '11', '2']
+        },
+        function (f, s) {
+          var res = [];
+          for (var i=0; i < f.length; i++) {
+            res.push(f[i]+':'+s[i]);
+          }
+          return res.join(',');
+        }
+      );
+      assert(createdInfo.formattedScore == '11:8,2:11,11:2');
+    })
   })
 
   describe('#calcStatistics', function() {
@@ -49,10 +122,6 @@ describe('Match Management', function() {
     var res1 = mm.calcStatistics(1, dummyMatches);
     var res2 = mm.calcStatistics(2, dummyMatches);
     var res3 = mm.calcStatistics(3, dummyMatches);
-
-    console.log(res1);
-    console.log(res2);
-    console.log(res3);
 
     it('should return correct winStreaks', function() {
       assert(res1.winStreak == 2);

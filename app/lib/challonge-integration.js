@@ -44,6 +44,14 @@ module.exports = function() {
       restlerPromise = restler.del(createURL(url));
     }
 
+    if (method == 'PUT') {
+      restlerPromise = restler.put(createURL(url), content, {
+        headers: {
+          'Content-Length': Buffer.byteLength(JSON.stringify(content))
+        }
+      });
+    }
+
     restlerPromise
       .on('success', function(data){
         deffered.resolve(data);
@@ -317,51 +325,141 @@ module.exports = function() {
      * it returns only he's open matches, otherwise returns empty array;
      * @param {integer} [required] tournamentId
      * @param {db.User} [optional] user
-     * @returns {q.promise}
+     * @returns {q.promise} -- structure of resolve object is:
+     *    [{
+     *      matchId: int,
+     *      player1:{
+     *        username: string,
+     *        userId: int,
+     *        challongeId: int
+     *      },
+     *      player2: {
+     *        username: string,
+     *        userId: int,
+              challongeId: int
+     *      }
+     *    }]
      */
     getMatchesForTournament: function(tournamentId, user) {
       var defer = q.defer();
-      db.Tournament.findById(tournamentId,{
-        include: [
-          {model: db.Participant, as: 'participants'}
-        ]
-      }).then(function(tournament){
-        var challongeResp;
-        if (tournament.creator_id == user.id) {
-          debugger;
-          challongeResp = sendContent('GET', 'tournaments/' + tournament.challonge_id + '/matches', {state: 'open'});
-        } else {
-          var participant = tournament.participants.filter(function(p){
-            return p.user_id == user.id;
-          });
-          if (participant) {
-            //retrieve only matches for him only
-            challongeResp = sendContent('GET', 'tournaments/' + tournament.challonge_id + '/matches', {state: 'open', participant_id: participant.challonge_id});
+
+      //returns promise with 'owner' | 'participant' | 'nothing'
+      function determineStatusOfUser() {
+        var defer = q.defer();
+        q.all([
+          db.sequelize.query(`SELECT "Tournaments"."challonge_id" FROM "Tournaments" WHERE "Tournaments"."id" = ${tournamentId}`),
+          db.sequelize.query(`SELECT "Participants"."challonge_id" FROM "Participants" WHERE "Participants"."user_id" = ${user.id} AND "Participants"."tournament_id" = ${tournamentId}`)
+        ]).then(function(res){
+          var tournament = res[0][0][0];
+          if (tournament) {
+            var returnObj = {tournamentChallongeId: tournament.challonge_id};
+            if (tournament.creator_id == user.id) {
+              returnObj['relation'] = 'creator';
+            } else if (res[1][0]){
+              returnObj['relation'] = 'participant';
+              returnObj['challongeId'] = res[1][0][0].challonge_id;
+            } else {
+              returnObj['relation'] = 'nothing';
+            }
+            defer.resolve(returnObj);
           } else {
-            var help = q.defer();
-            help.resolve([]);
-            challongeResp = help.promise;
+            defer.reject('Tournament not found');
           }
-        }
+        });
 
-        challongeResp.then(function(matches){
-          defer.resolve(matches);
-        }).catch(function(err){
-          defer.reject(err);
+        return defer.promise;
+      }
+
+      function mapMatches(matchesPromise) {
+        var defer = q.defer();
+
+        matchesPromise
+          .then(function(matches){
+            var distinctPlayersChallongeIds = new Set();
+            matches.forEach(function(matchObject) {
+              var match = matchObject.match;
+              distinctPlayersChallongeIds.add(match.player1_id);
+              distinctPlayersChallongeIds.add(match.player2_id);
+            });
+
+            var players = Array.from(distinctPlayersChallongeIds); //convert to plain array
+            var query = `SELECT "Users".*, "Participants"."challonge_id" FROM "Participants" LEFT JOIN "Users" ON "Participants"."user_id" = "Users"."id" WHERE "Participants"."challonge_id" IN (${players.join(',')})`;
+            db.sequelize.query(query)
+              .then(function(users){
+                 var users = users[0];
+                 defer.resolve(matches.map(function(matchObj){
+                  var match = matchObj.match;
+                  var player1 = users.find(function(u){
+                    return u.challonge_id == match.player1_id;
+                  });
+                  var player2 = users.find(function(u){
+                    return u.challonge_id == match.player2_id;
+                  });
+                  return {
+                    matchId: match.id,
+                    player1: {
+                      username: player1.name,
+                      userId: player1.id,
+                      challongeId: player1.challonge_id
+                    },
+                    player2: {
+                      username: player2.name,
+                      userId: player2.id,
+                      challongeId: player2.challonge_id
+                    }
+                  }
+                }));
+              })
+              .catch(function(err){
+                defer.reject(err);
+              })
+          })
+          .catch(function(err){
+            defer.reject(err);
+          });
+
+        return defer.promise;
+      }
+
+      determineStatusOfUser()
+        .then(function(userRelation){
+          var matches;
+          switch(userRelation['relation']) {
+            case 'creator':
+              matches = mapMatches(sendContent('GET', `tournaments/${userRelation.tournamentChallongeId}/matches`, {state: 'open'}));
+              break;
+            case 'participant':
+              matches = mapMatches(sendContent('GET', `tournaments/${userRelation.tournamentChallongeId}/matches`, {state: 'open', participant_id: userRelation.challonge_id}));
+              break;
+          }
+
+          if (matches) {
+            matches.then(function(res){defer.resolve(res);}).catch(function(err){defer.reject(err)});
+          } else {
+            defer.resolve([]);
+          }
         })
-
-      }).catch(function(err){
-        defer.reject(err);
-      })
+        .catch(function(){
+          defer.reject();
+        })
 
       return defer.promise;
     },
 
     /**
      * Submits match result into tournament.
+     * @param {int} tournamentId = challonge_id of tournament
+     * @param {int} matchId = challonge_id of match
+     * @param {int} winnerId = challonge_id of winner
+     * @param {string} score = csv format of score [e.q. "1-3,3-0,3-2"] - matches player1 must be first
      */
-    submitMatchResult: function(tournamentId, winnerId, looserId, score) {
-
+    submitMatchResult: function(tournamentId, matchId, winnerId, score) {
+      return sendContent('PUT', `tournaments/${tournamentId}/matches/${matchId}`,{
+        match: {
+          winner_id: winnerId,
+          scores_csv: score
+        }
+      });
     }
   }
 }

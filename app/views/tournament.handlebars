@@ -17,13 +17,28 @@
           {{#if tournaments.winner}}
             <h2>Winner: {{tournaments.winner}}</h2>
           {{else}}
-            {{#if matches}}
-              {{#each matches}}
-                {{match.id}} : {{match.player1_id}} vs {{match.player2_id}}
-              {{/each}}
-            {{else}}
-              <h2>Sorry no info for you.</h2>
-            {{/if}}
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Player 1</th>
+                  <th>Player 2</th>
+                  <th>Submit</th>
+                </tr>
+              </thead>
+              <tbody>
+                {{#each matches}}
+                  <tr>
+                    <td>{{inc @index}}</td>
+                    <td>{{player1.username}}</td>
+                    <td>{{player2.username}}</td>
+                    <td>
+                      <button class="btn btn-primary" data-toggle="modal" data-target="#{{matchId}}">Add result</button>
+                    </td>
+                  </tr>
+                {{/each}}
+              </tbody>
+            </table>
           {{/if}}
 
         </div>
@@ -31,4 +46,18 @@
     <div class="row">
         <iframe src="{{tournament.challonge_url}}/module?theme=1" width="100%" height="300" frameborder="0" scrolling="auto" allowtransparency="true"></iframe>
     </div>
+
+    {{!-- modals for submitting matches --}}
+    {{#each matches}}
+      {{> add-modal
+            id=matchId
+            fixed=true
+            route="/tournaments/add_match"
+            tournamentId=../tournament.challonge_id
+            first-prompt=player1.username
+            second-prompt=player2.username
+            player1=player1.challongeId
+            player2=player2.challongeId
+      }}
+    {{/each}}
 </div>

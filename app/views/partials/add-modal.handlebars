@@ -1,4 +1,4 @@
-<div class="modal fade" id="add-match-modal">
+<div class="modal fade" id="{{id}}">
     <div class="modal-dialog">
         <div class="modal-content">
             <form action="{{route}}" method="POST">
@@ -17,7 +17,10 @@
                           {{second-prompt}}
                         </div>
                       </div>
-                      <input type="hidden" name="match-id" value="{{match-id}}">
+                      <input type="hidden" name="player1id" value="{{player1}}">
+                      <input type="hidden" name="player2id" value="{{player2}}">
+                      <input type="hidden" name="matchId" value="{{id}}">
+                      <input type="hidden" name="tournamentId" value="{{tournamentId}}">
                     {{else}}
                       <div class="form-group">
                         <label for="oponent">Oponent</label>

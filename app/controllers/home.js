@@ -354,6 +354,48 @@ router.get('/tournaments/:id/join/:isJoining', isLoggedIn, function(req, res){
   })
 });
 
+router.post('/tournaments/add_match', isLoggedIn, function(req, res){
+  var tournamentId = req.body['tournamentId'],
+      matchId = req.body['matchId'],
+      player1 = req.body['player1id'],
+      player2 = req.body['player2id'];
+
+  var player1Score = [req.body['first-submitter'], req.body['second-submitter'], req.body['third-submitter']];
+  var player2Score = [req.body['first-oponent'], req.body['second-oponent'], req.body['third-oponent']];
+
+  try {
+    var result = matchManagement.createMatch({
+      id: player1,
+      matchScore: player1Score,
+      points: 0
+    }, {
+      id: player2,
+      matchScore: player2Score,
+      points: 0
+    }, function(f, s) {
+      var res = [];
+      for (var i=0; i < f.length; i++) {
+        res.push(f[i]+':'+s[i]);
+      }
+      return res.join(',');
+    });
+
+    challongeIntegration.submitMatchResult(tournamentId, matchId, result.winnerId, result.formattedScore)
+      .then(function(){
+        res.redirect('/tournaments');
+      })
+      .catch(function(err){
+        console.error(err);
+        res.sendStatus(401);
+      })
+
+  } catch(err) {
+    console.error(err);
+    res.sendStatus(401);
+  }
+
+});
+
 router.get('/tournaments/:id/start/:isStarting', isLoggedIn, function(req, res){
   var tournamentId = req.params.id,
       isStarting = req.params.isStarting == 'true',
