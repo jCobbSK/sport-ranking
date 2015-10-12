@@ -58,7 +58,11 @@ module.exports = {
       return user;
     });
 
-    var loggedUserRank = rankedUsers.find(function(u){ return u.self;}) || -1;
+    var loggedUserRank = rankedUsers.find(function(u){ return u.self;});
+    if (loggedUserRank)
+      loggedUserRank = loggedUserRank.rank;
+    else
+      loggedUserRank = -1;
 
     return {
       rankedUsers: rankedUsers,

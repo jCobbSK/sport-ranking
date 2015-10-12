@@ -111,7 +111,7 @@
 </div>
 
 <script>
-    $(document).ready(function(){
+    window.onload = function(){
         setupTimers();
 
         $("#match-filter").change(function(){
@@ -179,7 +179,7 @@
                 data: {{pointHistory}}
             }]
         });
-    })
+    }
 
 
 </script>

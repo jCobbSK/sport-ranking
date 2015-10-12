@@ -51,13 +51,9 @@ router.get('/users/:id', isLoggedIn, function(req, _res){
         ]
       }
     }),
-    db.User.findAll({
-      order: 'points DESC',
-      include: [
-        {model: db.Match, as: 'wins'},
-        {model: db.Match, as: 'losses'}
-      ]
-    }),
+    db.sequelize.query(
+      'SELECT *, (SELECT COUNT(*) FROM "Matches" WHERE "winner_id" = "Users"."id") AS "wins", (SELECT COUNT(*) FROM "Matches" WHERE "looser_id" = "Users"."id") AS "losts" FROM "Users" ORDER BY "points" DESC;'
+    ),
     db.PointHistory.findAll({
       order: '"createdAt" ASC',
       where: {
@@ -68,12 +64,13 @@ router.get('/users/:id', isLoggedIn, function(req, _res){
     //calculate statistics
     var stats = matchManagement.calcStatistics(usersId, res[0]);
     var matches = modelHelpers.matchesTransform(usersId, res[0]);
-    var users = modelHelpers.usersTransform(usersId, res[1]);
-    var actualUser = users.users.filter(function(u){
-      return u.id == usersId;
-    })[0];
-    actualUser.rank = (actualUser.wins > 0 || actualUser.losts > 0) ? users.loggedUserRank : '';
-
+    var users = modelHelpers.usersTransform({id: usersId}, res[1][0]);
+    if (users.loggedUserRank == -1) {
+      var actualUser = users.notRankedUsers.find(function(u){return u.id == usersId});
+      actualUser.rank = '';
+    } else {
+      var actualUser = users.rankedUsers.find(function(u){return u.id == usersId});
+    }
     _res.render('user-profile',{
       user: actualUser,
       stats: stats,
@@ -179,8 +176,8 @@ router.post('/add_match', isLoggedIn, function(req, _res, next) {
 
   //check params
   q.all([
-    db.User.find(req.user.id),
-    db.User.find(req.body.oponent)
+    db.User.findById(req.user.id),
+    db.User.findById(req.body.oponent)
   ]).then(function(res){
     if (!res[0] || !res[1]) {
       _res.redirect('/?error='+encodeURIComponent('Not logged in or bad oponent'));

@@ -36,6 +36,14 @@ module.exports = function (grunt) {
         ],
         options: {
           ignorePath: '../../../public/'
+        },
+        fileTypes: {
+          html: {
+            replace: {
+              js: '<script src="/{{filePath}}"></script>',
+              css: '<link rel="stylesheet" href="/{{filePath}}">'
+            }
+          }
         }
       }
     },
