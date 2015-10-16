@@ -20,7 +20,8 @@
                   {{#ifCond ../actualPage '==' '0'}}
                     {{#ifCond winner '||' looser}}
                       {{#ifCond @index '==' '0'}}
-                        <a class="btn btn-danger" href="/requestDeleteMatch" style="float: right;">Delete</a>
+
+                        <a class="btn btn-danger" href="/matches/deleteLast" style="float: right;">Delete</a>
                       {{/ifCond}}
                     {{/ifCond}}
                   {{/ifCond}}
