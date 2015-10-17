@@ -28,8 +28,12 @@
                         <td>{{note}}</td>
                         <td class="timed-var" data-time="{{startsAt}}"></td>
                         <td>
+                          {{#ifCond participants.length '<' 2}}
+                            <button class="btn btn-warning" disabled>Not enough players</button>
+                          {{else}}
                             <a class="btn-success btn" href="/tournaments/{{id}}/start/true">Start</a>
-                            <a class="btn btn-danger" href="/tournaments/{{id}}/start/false">Cancel</a>
+                          {{/ifCond}}
+                          <a class="btn btn-danger" href="/tournaments/{{id}}/start/false">Delete</a>
                         </td>
                     </tr>
                   {{/each}}

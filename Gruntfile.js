@@ -116,7 +116,7 @@ module.exports = function (grunt) {
             grunt.log.error('Unable to make a delayed live reload.');
           done(reloaded);
         });
-    }, 500);
+    }, 2000);
   });
 
   grunt.registerTask('init-point-history', 'Initialize point history table', function(){

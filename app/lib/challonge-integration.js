@@ -3,7 +3,7 @@ var q = require('q'),
   restler = require('restler'),
     db = require('../models');
 
-module.exports = function() {
+module.exports = (function() {
 
   var mainURL = (function(){
     var actualSets = challongeAPI[process.env.NODE_ENV || 'development'];
@@ -118,19 +118,21 @@ module.exports = function() {
           //data consists of challongeUrl, challongeId
           var challongeUrl = data.tournament.full_challonge_url,
               challongeId = data.tournament.id;
-          q.all([
-            db.Tournament.create({
-              creator_id: user.id,
-              name: name,
-              type: type,
-              note: note,
-              challonge_url: challongeUrl,
-              challonge_id: challongeId,
-              startsAt: startsAt
-            })
-          ])
+          db.Tournament.create({
+            creator_id: user.id,
+            name: name,
+            type: type,
+            note: note,
+            challonge_url: challongeUrl,
+            challonge_id: challongeId,
+            startsAt: startAt
+          })
             .then(function(result){
               defer.resolve(result);
+            })
+            .catch(function(err){
+              console.error(err);
+              defer.reject(err);
             })
         })
         .catch(function(err){
@@ -277,7 +279,7 @@ module.exports = function() {
                     deferResult.reject(err);
                 })
               })
-              .catch(function(){
+              .catch(function(err){
                 deferResult.reject({challongeError:err.errors.join(' ; ')});
               })
         })
@@ -462,4 +464,4 @@ module.exports = function() {
       });
     }
   }
-}
+})();
