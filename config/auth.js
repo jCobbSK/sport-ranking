@@ -1,6 +1,6 @@
 var passport = require('passport'),
     cookieParser = require('cookie-parser'),
-    session = require('express-session'),
+    redisSession = require('./redis-session'),
     FacebookStrategy = require('passport-facebook'),
     db = require('../app/models'),
     facebookSettings = require('./config.json')['facebookSettings'];
@@ -54,11 +54,7 @@ module.exports = function(app) {
   ));
 
   app.use(cookieParser());
-  app.use(session({
-    secret: 'some secret',
-    resave: true,
-    saveUninitialized: true
-  }));
+  redisSession(app);
   app.use(passport.initialize());
   app.use(passport.session());
 }
