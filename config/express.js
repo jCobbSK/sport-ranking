@@ -16,12 +16,12 @@ module.exports = function(app, config) {
   app.locals.ENV_DEVELOPMENT = env == 'development';
 
   app.engine('handlebars', exphbs({
-    layoutsDir: config.root + '/app/views/layouts/',
+    layoutsDir: config.root + '/app/server/views/layouts/',
     defaultLayout: 'main',
-    partialsDir: [config.root + '/app/views/partials/'],
-    helpers: require('../app/hbs-helpers/')
+    partialsDir: [config.root + '/app/server/views/partials/'],
+    helpers: require('../app/server/hbs-helpers/')
   }));
-  app.set('views', config.root + '/app/views');
+  app.set('views', config.root + '/app/server/views');
   app.set('view engine', 'handlebars');
 
   // app.use(favicon(config.root + '/public/img/favicon.ico'));
@@ -37,7 +37,7 @@ module.exports = function(app, config) {
 
   auth(app);
 
-  var controllers = glob.sync(config.root + '/app/controllers/*.js');
+  var controllers = glob.sync(config.root + '/app/server/controllers/*.js');
   controllers.forEach(function (controller) {
     require(controller)(app);
   });

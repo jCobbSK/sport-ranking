@@ -2,7 +2,7 @@ var passport = require('passport'),
     cookieParser = require('cookie-parser'),
     redisSession = require('./redis-session'),
     FacebookStrategy = require('passport-facebook'),
-    db = require('../app/models'),
+    db = require('../app/server/models'),
     facebookSettings = require('./config.json')['facebookSettings'];
 
 module.exports = function(app) {

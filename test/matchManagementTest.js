@@ -1,5 +1,5 @@
 var assert = require("assert"),
-  mm = require('../app/lib/matchManagement');
+  mm = require('../app/server/lib/matchManagement');
 
 describe('Match Management', function() {
   describe('#matchResult()', function () {
